@@ -28,6 +28,10 @@ function write_power_balance(path::AbstractString, sep::AbstractString, inputs::
 		end
 	end
 
+	if setup["ModelBIO"] == 1
+		dfbiorefinery = inputs["dfbiorefinery"]
+	end
+
 	T = inputs["T"]     # Number of time steps (hours)
 	Z = inputs["Z"]     # Number of zones
 	SEG = inputs["SEG"] # Number of load curtailment segments
@@ -37,11 +41,11 @@ function write_power_balance(path::AbstractString, sep::AbstractString, inputs::
 	dfPowerBalance = Array{Any}
 	rowoffset=3
 	for z in 1:Z
-	   	dfTemp1 = Array{Any}(nothing, T+rowoffset, 13)
-	   	dfTemp1[1,1:size(dfTemp1,2)] = ["Generation", "H2-G2P",  "Storage_Discharge", "Storage_Charge",
+	   	dfTemp1 = Array{Any}(nothing, T+rowoffset, 15)
+	   	dfTemp1[1,1:size(dfTemp1,2)] = ["Generation", "H2-G2P", "Bioelectricity Generation",  "Storage_Discharge", "Storage_Charge",
 	           "Flexible_Demand_Defer", "Flexible_Demand_Stasify",
 	           "Demand_Response", "Nonserved_Energy",
-			   "Transmission_NetExport", "Transmission_Losses","HSC Power Demand","CSC Power Demand",
+			   "Transmission_NetExport", "Transmission_Losses","HSC Power Demand","CSC Power Demand","BESC Power Demand",
 	           "Power Sector Demand"]
 	   	dfTemp1[2,1:size(dfTemp1,2)] = repeat([z],size(dfTemp1,2))
 	   	for t in 1:T
@@ -61,24 +65,30 @@ function write_power_balance(path::AbstractString, sep::AbstractString, inputs::
 				dfTemp1[t+rowoffset,2] = 0
 			end
 
-			dfTemp1[t+rowoffset,3] = sum(value.(EP[:vP][dfGen[(dfGen[!,:STOR].>=1) .&  (dfGen[!,:Zone].==z),:][!,:R_ID],t]))
-	     	dfTemp1[t+rowoffset,4] = 0
-	     	if !isempty(intersect(dfGen[dfGen.Zone.==z,:R_ID],STOR_ALL))
-	     	    dfTemp1[t+rowoffset,4] = -sum(value.(EP[:vCHARGE][y,t]) for y in intersect(dfGen[dfGen.Zone.==z,:R_ID],STOR_ALL))
-	     	end
+			if setup["ModelBIO"] == 1
+				dfTemp1[t+rowoffset,3] = sum(value.(EP[:eBioelectricity_produced_per_plant_per_time][dfbiorefinery[(dfbiorefinery[!,:Zone].==z),:][!,:R_ID],t])) 
+			else
+				dfTemp1[t+rowoffset,3] = 0
+			end
+
+			dfTemp1[t+rowoffset,4] = sum(value.(EP[:vP][dfGen[(dfGen[!,:STOR].>=1) .&  (dfGen[!,:Zone].==z),:][!,:R_ID],t]))
 	     	dfTemp1[t+rowoffset,5] = 0
+	     	if !isempty(intersect(dfGen[dfGen.Zone.==z,:R_ID],STOR_ALL))
+	     	    dfTemp1[t+rowoffset,5] = -sum(value.(EP[:vCHARGE][y,t]) for y in intersect(dfGen[dfGen.Zone.==z,:R_ID],STOR_ALL))
+	     	end
+	     	dfTemp1[t+rowoffset,6] = 0
 	     	if !isempty(intersect(dfGen[dfGen.Zone.==z,:R_ID],FLEX))
-	     	    dfTemp1[t+rowoffset,5] = sum(value.(EP[:vCHARGE_FLEX][y,t]) for y in intersect(dfGen[dfGen.Zone.==z,:R_ID],FLEX))
+	     	    dfTemp1[t+rowoffset,6] = sum(value.(EP[:vCHARGE_FLEX][y,t]) for y in intersect(dfGen[dfGen.Zone.==z,:R_ID],FLEX))
 	     	end
-	     	dfTemp1[t+rowoffset,6] = -sum(value.(EP[:vP][dfGen[(dfGen[!,:FLEX].>=1) .&  (dfGen[!,:Zone].==z),:][!,:R_ID],t]))
+	     	dfTemp1[t+rowoffset,7] = -sum(value.(EP[:vP][dfGen[(dfGen[!,:FLEX].>=1) .&  (dfGen[!,:Zone].==z),:][!,:R_ID],t]))
 	     	if SEG>1
-	       		dfTemp1[t+rowoffset,7] = sum(value.(EP[:vNSE][2:SEG,t,z]))
+	       		dfTemp1[t+rowoffset,8] = sum(value.(EP[:vNSE][2:SEG,t,z]))
 	     	else
-	       		dfTemp1[t+rowoffset,7]=0
+	       		dfTemp1[t+rowoffset,8]=0
 	     	end
-	     	dfTemp1[t+rowoffset,8] = value(EP[:vNSE][1,t,z])
-	     	dfTemp1[t+rowoffset,9] = 0
+	     	dfTemp1[t+rowoffset,9] = value(EP[:vNSE][1,t,z])
 	     	dfTemp1[t+rowoffset,10] = 0
+	     	dfTemp1[t+rowoffset,11] = 0
 		#=
 	     	if setup["NetworkExpansion"] == 1
 	     	    dfTemp1[t+rowoffset,8] = value(EP[:ePowerBalanceNetExportFlows][t,z])
@@ -86,23 +96,29 @@ function write_power_balance(path::AbstractString, sep::AbstractString, inputs::
 	     	end
 		=#
 			if Z>=2
-				dfTemp1[t+rowoffset,9] = value(EP[:ePowerBalanceNetExportFlows][t,z])
-				dfTemp1[t+rowoffset,10] = -1/2 * value(EP[:eLosses_By_Zone][z,t])
+				dfTemp1[t+rowoffset,10] = value(EP[:ePowerBalanceNetExportFlows][t,z])
+				dfTemp1[t+rowoffset,11] = -1/2 * value(EP[:eLosses_By_Zone][z,t])
 			end
 
 			if setup["ModelH2"] == 1
-				dfTemp1[t+rowoffset,11] = - value(EP[:eH2NetpowerConsumptionByAll][t,z])
-			else
-				dfTemp1[t+rowoffset,11] = 0
-			end
-
-			if setup["ModelCO2"] == 1
-				dfTemp1[t+rowoffset,12] = - value(EP[:eCSCNetpowerConsumptionByAll][t,z])
+				dfTemp1[t+rowoffset,12] = - value(EP[:eH2NetpowerConsumptionByAll][t,z])
 			else
 				dfTemp1[t+rowoffset,12] = 0
 			end
 
-	     	dfTemp1[t+rowoffset,13] = -inputs["pD"][t,z]
+			if setup["ModelCO2"] == 1
+				dfTemp1[t+rowoffset,13] = - value(EP[:eCSCNetpowerConsumptionByAll][t,z])
+			else
+				dfTemp1[t+rowoffset,13] = 0
+			end
+
+			if setup["ModelBIO"] == 1
+				dfTemp1[t+rowoffset,14] = - value(EP[:eBIONetpowerConsumptionByAll][t,z])
+			else
+				dfTemp1[t+rowoffset,14] = 0
+			end
+
+	     	dfTemp1[t+rowoffset,15] = -inputs["pD"][t,z]
 
 			if setup["ParameterScale"] == 1
 				dfTemp1[t+rowoffset,1] = dfTemp1[t+rowoffset,1] * ModelScalingFactor
@@ -118,6 +134,8 @@ function write_power_balance(path::AbstractString, sep::AbstractString, inputs::
 				dfTemp1[t+rowoffset,11] = dfTemp1[t+rowoffset,11] * ModelScalingFactor
 				dfTemp1[t+rowoffset,12] = dfTemp1[t+rowoffset,12] * ModelScalingFactor
 				dfTemp1[t+rowoffset,13] = dfTemp1[t+rowoffset,13] * ModelScalingFactor
+				dfTemp1[t+rowoffset,14] = dfTemp1[t+rowoffset,14] * ModelScalingFactor
+				dfTemp1[t+rowoffset,15] = dfTemp1[t+rowoffset,15] * ModelScalingFactor
 			end
 			# DEV NOTE: need to add terms for electricity consumption from H2 balance
 	   	end

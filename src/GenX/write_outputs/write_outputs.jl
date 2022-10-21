@@ -1,6 +1,6 @@
 """
 DOLPHYN: Decision Optimization for Low-carbon Power and Hydrogen Networks
-Copyright (C) 2021,  Massachusetts Institute of Technology
+Copyright (C) 2022,  Massachusetts Institute of Technology
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
@@ -60,6 +60,7 @@ function write_outputs(EP::Model, path::AbstractString, setup::Dict, inputs::Dic
 	end
 
 	write_status(path, sep, inputs, setup, EP)
+
 	elapsed_time_costs = @elapsed write_costs(path, sep, inputs, setup, EP)
 	println("Time elapsed for writing costs is")
 	println(elapsed_time_costs)
@@ -76,6 +77,7 @@ function write_outputs(EP::Model, path::AbstractString, setup::Dict, inputs::Dic
 	elapsed_time_power_balance = @elapsed write_power_balance(path, sep, inputs, setup, EP)
 	println("Time elapsed for writing power balance is")
 	println(elapsed_time_power_balance)
+	
 	if inputs["Z"] > 1
 		elapsed_time_flows = @elapsed write_transmission_flows(path, sep, setup, inputs, EP)
 		println("Time elapsed for writing transmission flows is")

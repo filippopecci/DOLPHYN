@@ -1,6 +1,6 @@
 """
 DOLPHYN: Decision Optimization for Low-carbon Power and Hydrogen Networks
-Copyright (C) 2021,  Massachusetts Institute of Technology
+Copyright (C) 2022,  Massachusetts Institute of Technology
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
@@ -22,11 +22,13 @@ export configure_solver
 export load_inputs
 export load_h2_inputs
 export load_co2_inputs
+export load_bio_inputs
 export generate_model
 export solve_model
 export write_outputs
 export write_HSC_outputs
 export write_CSC_outputs
+export write_BESC_outputs
 export cluster_inputs
 export mga
 
@@ -42,7 +44,7 @@ using Dates
 using Clustering
 using Distances
 using Combinatorics
-using Documenter
+#using Documenter
 using Revise
 # Uncomment if Gurobi or CPLEX active license and installations are there and the user intends to use either of them
 using Gurobi
@@ -95,7 +97,7 @@ include("HSC/load_inputs/load_h2_demand.jl")
 include("HSC/load_inputs/load_h2_generators_variability.jl")
 include("HSC/load_inputs/load_h2_pipeline_data.jl")
 include("HSC/load_inputs/load_h2_truck.jl")
-include("HSC/load_inputs/load_H2_inputs.jl")
+include("HSC/load_inputs/load_h2_inputs.jl")
 include("HSC/load_inputs/load_co2_cap_hsc.jl")
 include("HSC/load_inputs/load_h2_g2p.jl")
 include("HSC/load_inputs/load_h2_g2p_variability.jl")
@@ -107,6 +109,12 @@ include("CSC/load_inputs/load_co2_capture_variability.jl")
 include("CSC/load_inputs/load_co2_storage.jl")
 include("CSC/load_inputs/load_co2_capture_compression.jl")
 include("CSC/load_inputs/load_co2_pipeline_data.jl")
+
+#Load input data - BESC
+include("BESC/load_inputs/load_bio_inputs.jl")
+include("BESC/load_inputs/load_bio_refinery.jl")
+include("BESC/load_inputs/load_bio_supply.jl")
+
 
 #Core GenX Features
 include("GenX/model/core/discharge/discharge.jl")
@@ -165,8 +173,6 @@ include("HSC/model/truck/h2_long_duration_truck.jl")
 include("HSC/model/storage/h2_storage_investment_energy.jl")
 include("HSC/model/storage/h2_storage_investment_charge.jl")
 include("HSC/model/storage/h2_storage.jl")
-include("HSC/model/storage/h2_storage_asymmetric.jl")
-include("HSC/model/storage/h2_storage_symmetric.jl")
 include("HSC/model/storage/h2_storage_all.jl")
 include("HSC/model/storage/h2_long_duration_storage.jl")
 
@@ -181,9 +187,10 @@ include("HSC/model/g2p/h2_g2p.jl")
 # Policies
 include("HSC/model/policies/co2_cap_hsc.jl")
 
+
 #Core CSC Modelling Features
-include("CSC/model/core/co2_investment.jl")
-include("CSC/model/core/co2_outputs.jl")
+include("CSC/model/core/co2_capture_investment.jl")
+include("CSC/model/core/co2_capture_var_cost.jl")
 include("CSC/model/core/emissions_csc.jl")
 
 # CO2 Capture
@@ -202,6 +209,16 @@ include("CSC/model/compression/co2_capture_compression.jl")
 # CO2 Pipeline
 include("CSC/model/transmission/co2_pipeline.jl")
 
+
+#Core BESC Modelling Features
+include("BESC/model/core/biorefinery_investment.jl")
+include("BESC/model/core/biorefinery.jl")
+include("BESC/model/core/biorefinery_var_cost.jl")
+include("BESC/model/core/emissions_besc.jl")
+
+#Biomass Supplies
+include("BESC/model/supply/bio_herb_supply.jl")
+include("BESC/model/supply/bio_wood_supply.jl")
 
 # Load model generation and solving scripts
 include("co2_cap_power_hsc.jl")
@@ -276,17 +293,22 @@ include("HSC/write_outputs/write_g2p_capacity.jl")
 
 # CSC Write Outputs
 include("CSC/write_outputs/write_co2_capture_capacity.jl")
-include("CSC/write_outputs/write_co2_capture_costs.jl")
+include("CSC/write_outputs/write_CSC_outputs.jl")
+include("CSC/write_outputs/write_CSC_costs.jl")
 include("CSC/write_outputs/write_co2_storage_injection_capacity.jl")
 include("CSC/write_outputs/write_co2_pipeline_flow.jl")
 include("CSC/write_outputs/write_co2_pipeline_expansion.jl")
-include("CSC/write_outputs/write_co2_emission_balance.jl")
+include("CSC/write_outputs/write_co2_emission_balance_zone.jl")
 include("CSC/write_outputs/write_co2_storage_balance.jl")
+include("CSC/write_outputs/write_co2_emission_balance_system.jl")
 
-include("CSC/write_outputs/write_CSC_outputs.jl")
-include("CSC/write_outputs/write_CSC_costs.jl")
-
-# Modeling to generate alternatives
-include("modeling_to_generate_alternatives/modeling_to_generate_alternatives.jl")
+# BESC Write Outputs
+include("BESC/write_outputs/write_BESC_outputs.jl")
+include("BESC/write_outputs/write_BESC_costs.jl")
+include("BESC/write_outputs/write_bio_plant_capacity.jl")
+include("BESC/write_outputs/write_bio_zone_bioelectricity_produced.jl")
+include("BESC/write_outputs/write_bio_zone_biohydrogen_produced.jl")
+include("BESC/write_outputs/write_bio_zone_herb_consumed.jl")
+include("BESC/write_outputs/write_bio_zone_wood_consumed.jl")
 
 end

@@ -1,6 +1,6 @@
 """
 DOLPHYN: Decision Optimization for Low-carbon Power and Hydrogen Networks
-Copyright (C) 2021,  Massachusetts Institute of Technology
+Copyright (C) 2022,  Massachusetts Institute of Technology
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
@@ -79,7 +79,7 @@ function emissions_hsc(EP::Model, inputs::Dict, setup::Dict)
         eH2EmissionsByZone[z = 1:Z, t = 1:T],
         sum(eH2EmissionsByPlant[y, t] for y in dfH2Gen[(dfH2Gen[!, :Zone].==z), :R_ID])
     )
-
+    
     # If CO2 price is implemented in HSC balance or Power Balance and SystemCO2 constraint is active (independent or joint), then need to add cost penalty due to CO2 prices
     if (setup["H2CO2Cap"] == 4 && setup["SystemCO2Constraint"] == 1)
         # Use CO2 price for HSC supply chain

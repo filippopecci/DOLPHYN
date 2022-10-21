@@ -1,6 +1,6 @@
 """
 DOLPHYN: Decision Optimization for Low-carbon Power and Hydrogen Networks
-Copyright (C) 2021,  Massachusetts Institute of Technology
+Copyright (C) 2022,  Massachusetts Institute of Technology
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
@@ -92,10 +92,6 @@ function h2_g2p_no_commit(EP::Model, inputs::Dict,setup::Dict)
 	end
 
 	EP[:ePowerBalance] += ePowerBalanceH2G2PNoCommit
-
-	##For CO2 Polcy constraint right hand side development - power consumption by zone and each time step
-	EP[:eH2NetpowerConsumptionByAll] += ePowerBalanceH2G2PNoCommit
-
 
 	###Constraints###
 	# Power and natural gas consumption associated with H2 generation in each time step
