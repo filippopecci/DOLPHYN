@@ -95,7 +95,7 @@ function write_h2_balance(path::AbstractString, sep::AbstractString, inputs::Dic
 		# end
 
 			if setup["ModelH2G2P"] == 1
-				dfTemp1[t+rowoffset,10] = sum(value.(EP[:vH2G2P][dfH2G2P[(dfH2G2P[!,:Zone].==z),:][!,:R_ID],t])) 
+				dfTemp1[t+rowoffset,10] = -sum(value.(EP[:vH2G2P][dfH2G2P[(dfH2G2P[!,:Zone].==z),:][!,:R_ID],t])) 
 			else
 				dfTemp1[t+rowoffset,10] = 0
 			end
