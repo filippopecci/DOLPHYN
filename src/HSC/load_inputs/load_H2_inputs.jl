@@ -85,6 +85,7 @@ function load_h2_inputs(inputs::Dict,setup::Dict,path::AbstractString)
 		inputs = load_period_map(setup, path, sep, inputs)
 	end
 	print_and_log("HSC Input CSV Files Successfully Read In From $path$sep")
-
+	
 	return inputs
+
 end

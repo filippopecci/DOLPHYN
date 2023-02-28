@@ -23,6 +23,7 @@ export configure_settings
 export configure_solver
 export load_inputs
 export load_h2_inputs
+export load_ng_inputs
 export generate_model
 export solve_model
 export write_outputs
@@ -30,6 +31,7 @@ export write_HSC_outputs
 export cluster_inputs
 export mga
 export h2_inherit_clusters
+export ng_inherit_clusters
 
 using JuMP # used for mathematical programming
 using DataFrames #This package allows put together data into a matrix
@@ -229,6 +231,7 @@ include("HSC/load_inputs/load_h2_g2p_variability.jl")
 
 # Inherit clusters from GenX
 include("h2_inherit_clusters.jl")
+include("ng_inherit_clusters.jl")
 
 # Auxiliary logging function
 include("print_and_log.jl")
@@ -246,7 +249,13 @@ include("configure_solver/configure_cplex.jl")
 include("configure_solver/configure_clp.jl")
 include("configure_solver/configure_cbc.jl")
 include("configure_solver/configure_solver.jl")
+
+
+#HSC Modelling Features
+include("HSC/model/hydrogen_supply_chain_model.jl")
+
 #Core HSC Modelling Features
+
 include("HSC/model/core/h2_investment.jl")
 include("HSC/model/core/h2_outputs.jl")
 include("HSC/model/core/h2_non_served.jl")
@@ -313,5 +322,16 @@ include("HSC/write_outputs/write_h2_g2p.jl")
 include("HSC/write_outputs/write_g2p_capacity.jl")
 include("HSC/write_outputs/choose_h2_output_dir.jl")
 
+
+# Natural Gas Modelling
+include("NaturalGas/model/natural_gas_model.jl")
+include("NaturalGas/model/ng_investments.jl")
+include("NaturalGas/model/ng_svl.jl")
+include("NaturalGas/model/ng_pipeline.jl")
+include("NaturalGas/model/ng_to_hydrogen.jl")
+include("NaturalGas/model/ng_to_power.jl")
+
+#Load input data - Natural Gas
+include("NaturalGas/load_inputs/load_ng_inputs.jl")
 
 end

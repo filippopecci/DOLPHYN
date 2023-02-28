@@ -106,10 +106,6 @@ function generate_model(setup::Dict,inputs::Dict,OPTIMIZER::MOI.OptimizerWithAtt
 	# Expression for "baseline" power balance constraint
 	@expression(EP, ePowerBalance[t=1:T, z=1:Z], 0)
 
-	# Initialize Hydrogen Balance Expression
-	# Expression for "baseline" H2 balance constraint
-	@expression(EP, eH2Balance[t=1:T, z=1:Z], 0)
-
 	# Initialize Objective Function Expression
 	@expression(EP, eObj, 0)
 
@@ -180,63 +176,21 @@ function generate_model(setup::Dict,inputs::Dict,OPTIMIZER::MOI.OptimizerWithAtt
 		EP = retrofit(EP, inputs)
 	end
 
-	###### START OF H2 INFRASTRUCTURE MODEL --- SHOULD BE A SEPARATE FILE?? ###############
+	# Hydrogen Supply Chain model
 	if setup["ModelH2"] == 1
-
-		# Net Power consumption by HSC supply chain by z and timestep - used in emissions constraints
-		@expression(EP, eH2NetpowerConsumptionByAll[t=1:T,z=1:Z], 0)	
-
-		# Infrastructure
-		EP = h2_outputs(EP, inputs, setup)
-
-		# Investment cost of various hydrogen generation sources
-		EP = h2_investment(EP, inputs, setup)
-	
-		if !isempty(inputs["H2_GEN"])
-			#model H2 generation
-			EP = h2_production(EP, inputs, setup)
-		end
-
-		# Direct emissions of various hydrogen sector resources
-		EP = emissions_hsc(EP, inputs,setup)
-
-		# Model H2 non-served
-		EP = h2_non_served(EP, inputs,setup)
-
-		# Model hydrogen storage technologies
-		if !isempty(inputs["H2_STOR_ALL"])
-			EP = h2_storage(EP,inputs,setup)
-		end
-
-		if !isempty(inputs["H2_FLEX"])
-			#model H2 flexible demand resources
-			EP = h2_flexible_demand(EP, inputs, setup)
-		end
-
-		if setup["ModelH2Pipelines"] == 1
-			# model hydrogen transmission via pipelines
-			EP = h2_pipeline(EP, inputs, setup)
-		end
-
-		if setup["ModelH2Trucks"] == 1
-			# model hydrogen transmission via trucks
-			EP = h2_truck(EP, inputs, setup)
-		end
-
-		if setup["ModelH2G2P"] == 1
-			#model H2 Gas to Power
-			EP = h2_g2p(EP, inputs, setup)
-		end
-
-
+		hydrogen_supply_chain_model!(EP,inputs,setup)
 	end
 
+	# Natural Gas Supply model	
+	if setup["ModelNG"]==1
+		natural_gas_model!(EP,inputs,setup)
+	end
 
 	################  Policies #####################3
 	# CO2 emissions limits for the power sector only
-	if setup["ModelH2"] ==0
+	if setup["ModelH2"] ==0 && setup["ModelNG"]==0
 		co2_cap!(EP, inputs, setup)
-	elseif setup["ModelH2"]==1
+	elseif setup["ModelH2"]==1 && setup["ModelNG"]==0;
 		EP = co2_cap_power_hsc(EP, inputs, setup)
 	end
 
