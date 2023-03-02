@@ -6,10 +6,10 @@ function ng_svl!(EP,inputs,setup)
 
 	ngT = inputs["ng_T"]     # Number of time steps (days)
 	Z = inputs["Z"]     # Number of zones
-	ngR = inputs["ng_R"] 	# Number of generators
 
     SV = inputs["ng_STOR"]; # Index set of storage resources
     LIQ = inputs["ng_LIQ"]; # Index set of liquefaction resources
+    LNG_IMP = inputs["ng_LNG_IMP"]; # Index set of LNG terminals (subset of SV)
 
     @variable(EP,vNGWDW[y in LIQ,t in 1:ngT]>=0)
 
@@ -35,7 +35,8 @@ function ng_svl!(EP,inputs,setup)
     # Liquefaction capacity constraint (storage charge)
     @constraint(EP,cNgLiquefWithdraw[y in LIQ, t in 1:ngT],vNGWDW[y,t]<=EP[:eNgTotalCapLiquef][y])
 
-    # Moving LNG into storage tanks
+    # Moving LNG into storage tanks. 
+    # N.B. LNG Import Terminals are charged from out-of-model locations and variables "vNGSTORIN" are considered as free (there is a cost to be paid - see ng_imports.jl)
     @constraint(EP,cNgMoveLNG[y in LIQ, t in 1:ngT], sum(vNGSTORIN[w,t]  for w in df[df[!,:Liquefaction].==y,:R_ID]) == vNGWDW[y,t])
 
     # Storage tank operation with circular indexing
@@ -50,5 +51,13 @@ function ng_svl!(EP,inputs,setup)
     @constraint(EP, cNGSoCBalInterior[y in SV, t in INTERIOR_SUBPERIODS], vNGFILL[y,t] ==
     vNGFILL[y,t-1]-(1/df[y,:VaporEff_Down]*EP[:vNG][y,t])+(df[y,:LiquefEff_Up]*vNGSTORIN[y,t])-(df[y,:Stor_Self_Disch]*vNGFILL[y,t-1]))
 
+    # Cost of natural gas imports by resource "y" at day "t"
+    @expression(EP,eNgCVar_lng_import[y in LNG_IMP,t=1:ngT],inputs["ng_omega"][t]*df[y,:LNG_Import_Cost_per_MMBTU]*vNGSTORIN[y,t])
+
+    @expression(EP,eNgTotalCVarLngImportT[t=1:ngT],sum(eNgCVar_lng_import[y,t] for y in LNG_IMP))
+    
+    @expression(EP,eNgTotalCVarLngImport,sum(eNgTotalCVarLngImportT[t] for t in 1:ngT))
+    
+    EP[:eObj] += eNgTotalCVarLngImport;
 
 end

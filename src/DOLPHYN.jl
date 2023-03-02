@@ -330,7 +330,6 @@ include("NaturalGas/model/ng_investments.jl")
 include("NaturalGas/model/ng_svl.jl")
 include("NaturalGas/model/ng_demand_curtailment.jl")
 include("NaturalGas/model/ng_pipelines.jl")
-include("NaturalGas/model/ng_imports.jl")
 include("NaturalGas/model/ng_to_hydrogen.jl")
 include("NaturalGas/model/ng_to_power.jl")
 

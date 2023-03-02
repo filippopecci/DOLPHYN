@@ -16,11 +16,9 @@ function natural_gas_model!(EP,inputs,setup)
    # Natural gas that is injected by resource "y" at day "t"
    @variable(EP,vNG[y=1:ngR,t=1:ngT]>=0)
 
-   ng_pipelines!(EP,inputs,setup);
-
-   ng_imports!(EP,inputs,setup);
-
    ng_svl!(EP,inputs,setup);
+   
+   ng_pipelines!(EP,inputs,setup);
 
    ng_demand_curtailment!(EP,inputs,setup);
    

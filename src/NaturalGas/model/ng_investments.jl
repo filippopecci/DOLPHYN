@@ -8,7 +8,7 @@ function ng_investments!(EP,inputs,setup)
 
     SV = inputs["ng_STOR"];#Index set of LNG storage and varporization resources
     LIQ = inputs["ng_LIQ"];#Index set of liquefaction resources
-    IMP = inputs["ng_IMP"];#Index set of import resources
+    Pipe_IMP = inputs["ng_Pipe_IMP"];#Index set of import resources
 
     K = inputs["ngPipes"]
 
@@ -49,8 +49,8 @@ function ng_investments!(EP,inputs,setup)
     # Total liquefaction capacity of resource "y" - NO RETIRMENTS OR NEW INSTALLATIONS
     @expression(EP, eNgTotalCapLiquef[y in LIQ], df[y,:LiquefCapacity_MMBTU_day])
 
-    # Total import capacity of resource "y" - NO RETIRMENTS OR NEW INSTALLATIONS
-    @expression(EP, eNgTotalCapImport[y in IMP], df[y,:Max_Inflow_MMBTU_day])
+    # Total pipe import capacity of resource "y" - NO RETIRMENTS OR NEW INSTALLATIONS
+    @expression(EP, eNgTotalCapPipeImport[y in Pipe_IMP], df[y,:Max_PipeInflow_MMBTU_day])
 
     # Fixed costs of storage for every SV resource "y"
     @expression(EP,eNgCFixStor[y in SV], df[y,:Fixed_OM_Cost_per_MMBTU]*eNgTotalCapStor[y] + df[y,:InvCost_per_MMBTU]*vNGCAPSTOR[y])

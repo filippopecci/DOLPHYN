@@ -138,7 +138,8 @@ function load_ng_resources(inputs,setup,path)
        res_in[!,:InvCost_per_MMBTUday] = res_in[!,:InvCost_per_MMBTUday]/ ModelScalingFactor^2;
        res_in[!,:Fixed_OM_Cost_per_MMBTU] = res_in[!,:Fixed_OM_Cost_per_MMBTU]/ ModelScalingFactor^2;
        res_in[!,:Fixed_OM_Cost_per_MMBTUday] = res_in[!,:Fixed_OM_Cost_per_MMBTUday]/ ModelScalingFactor^2;
-       res_in[!,:Import_Cost_per_MMBTU] = res_in[!,:Import_Cost_per_MMBTU]/ ModelScalingFactor^2;
+       res_in[!,:Pipe_Import_Cost_per_MMBTU] = res_in[!,:Pipe_Import_Cost_per_MMBTU]/ ModelScalingFactor^2;
+       res_in[!,:LNG_Import_Cost_per_MMBTU] = res_in[!,:LNG_Import_Cost_per_MMBTU]/ ModelScalingFactor^2;
     end
 
 	# Store DataFrame of generators/resources input data for use in model
@@ -151,7 +152,8 @@ function load_ng_resources(inputs,setup,path)
     # Set of LNG liquefaction resources
     inputs["ng_LIQ"] = res_in[res_in.LiquefCapacity_MMBTU_day.>0,:R_ID]
     # Set of natural gas import resources
-    inputs["ng_IMP"] = res_in[res_in.Import.==1,:R_ID]
+    inputs["ng_Pipe_IMP"] = res_in[res_in.Pipe_Import.==1,:R_ID]
+    inputs["ng_LNG_IMP"] = res_in[res_in.LNG_Import.==1,:R_ID]
     # Set of power generators using natural gas
     inputs["ng_P_GEN"] = inputs["dfGen"][[occursin("gas",inputs["dfGen"].Resource_Type[n]) for n in 1:inputs["G"]],:R_ID];
 

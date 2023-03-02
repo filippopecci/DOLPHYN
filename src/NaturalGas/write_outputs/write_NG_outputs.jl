@@ -173,7 +173,7 @@ function write_capacity(EP,path,setup,inputs)
 
     SV = inputs["ng_STOR"]; # Index set of storage resources
     LIQ = inputs["ng_LIQ"]; # Index set of liquefaction resources
-    IMP = inputs["ng_IMP"]; #Index set of import resources
+    Pipe_IMP = inputs["ng_Pipe_IMP"]; #Index set of import resources
 
     for y in SV
         df[y,:StartStorCap]= value(EP[:eNgExistingCapStor][y]);
@@ -195,11 +195,11 @@ function write_capacity(EP,path,setup,inputs)
         end
     end
     
-    for y in IMP
-        df[y,:StartImpCap]=inputs["dfNGRes"][y,:Max_Inflow_MMBTU_day];
+    for y in Pipe_IMP
+        df[y,:StartImpCap]=inputs["dfNGRes"][y,:Max_PipeInflow_MMBTU_day];
         df[y,:RetImpCap]=0;
         df[y,:NewImpCap]=0;
-        df[y,:EndImpCap]=value(EP[:eNgTotalCapImport][y]); 
+        df[y,:EndImpCap]=value(EP[:eNgTotalCapPipeImport][y]); 
     end
 
     CSV.write(path*"/ng_capacity.csv",df)
