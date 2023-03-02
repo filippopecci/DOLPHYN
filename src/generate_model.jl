@@ -188,7 +188,7 @@ function generate_model(setup::Dict,inputs::Dict,OPTIMIZER::MOI.OptimizerWithAtt
 
 	################  Policies #####################3
 	# CO2 emissions limits for the power sector only
-	if setup["ModelH2"] ==0 && setup["ModelNG"]==0
+	if true # (setup["ModelH2"] ==0 && setup["ModelNG"]==0)
 		co2_cap!(EP, inputs, setup)
 	elseif setup["ModelH2"]==1 && setup["ModelNG"]==0;
 		EP = co2_cap_power_hsc(EP, inputs, setup)
@@ -225,7 +225,12 @@ function generate_model(setup::Dict,inputs::Dict,OPTIMIZER::MOI.OptimizerWithAtt
 		###Hydrogen Balanace constraints
 		@constraint(EP, cH2Balance[t=1:T, z=1:Z], EP[:eH2Balance][t,z] == inputs["H2_D"][t,z])
 	end
-	
+	if setup["ModelNG"] == 1
+		###Natural Gas Balanace constraints
+		ngT = inputs["ng_T"];
+		@constraint(EP, cNgBalance[t=1:ngT, z=1:Z], EP[:eNgBalance][t,z] == inputs["ng_D"][t,z])
+	end
+
 	## Record pre-solver time
 	presolver_time = time() - presolver_start_time
     	#### Question - What do we do with this time now that we've split this function into 2?

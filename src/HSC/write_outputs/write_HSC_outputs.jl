@@ -53,8 +53,6 @@ function write_HSC_outputs(EP::Model, genx_path::AbstractString, setup::Dict, in
         end
 	end
 
-
-
     write_h2_capacity(path, sep, inputs, setup, EP)
     write_h2_gen(path, sep, inputs, setup, EP)
     write_h2_nse(path, sep, inputs, setup, EP)

@@ -31,7 +31,7 @@ mysetup_ng = YAML.load(open(ng_settings)) # mysetup dictionary stores NG-specifi
 global_settings = joinpath(settings_path, "global_model_settings.yml") # Global settings for inte
 mysetup_global = YAML.load(open(global_settings)) # mysetup dictionary stores global settings
 mysetup = Dict()
-mysetup = merge(mysetup_ng,mysetup_hsc, mysetup_genx, mysetup_global) #Merge dictionary - value of common keys will be overwritten by value in global_model_settings
+mysetup = merge(mysetup_ng, mysetup_hsc, mysetup_genx, mysetup_global) #Merge dictionary - value of common keys will be overwritten by value in global_model_settings
 
 # Start logging
 using LoggingExtras
@@ -96,25 +96,30 @@ end
 
 # ### Load inputs for modeling the natural gas transport model
 if mysetup["ModelNG"]==1
-    myinputs = load_ng_inputs(myinputs,mysetup,inpath)
+    myinputs = load_ng_inputs(myinputs, mysetup, inpath)
 end
 
 ### Generate model
-# print_and_log("Generating the Optimization Model")
-# EP = generate_model(mysetup, myinputs, OPTIMIZER)
+print_and_log("Generating the Optimization Model")
+EP = generate_model(mysetup, myinputs, OPTIMIZER);
 
-# ### Solve model
-# print_and_log("Solving Model")
-# EP, solve_time = solve_model(EP, mysetup)
-# myinputs["solve_time"] = solve_time # Store the model solve time in myinputs
+### Solve model
+print_and_log("Solving Model")
+EP, solve_time = solve_model(EP, mysetup)
+myinputs["solve_time"] = solve_time # Store the model solve time in myinputs
 
-# ### Write power system output
+### Write power system output
 
-# print_and_log("Writing Output")
-# outpath = "$inpath/Results"
-# write_outputs(EP, outpath, mysetup, myinputs);
+print_and_log("Writing Output")
+outpath = "$inpath/Results"
+write_outputs(EP, outpath, mysetup, myinputs);
 
-# # Write hydrogen supply chain outputs
-# if mysetup["ModelH2"] == 1   
-#     write_HSC_outputs(EP, outpath, mysetup, myinputs)
-# end
+# Write hydrogen supply chain outputs
+if mysetup["ModelH2"] == 1   
+    write_HSC_outputs(EP, outpath, mysetup, myinputs)
+end
+
+# Write natural gas outputs
+if mysetup["ModelNG"]==1
+    write_NG_outputs(EP,outpath,mysetup,myinputs)
+end

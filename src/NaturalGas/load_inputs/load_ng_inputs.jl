@@ -37,6 +37,8 @@ function load_ng_network(inputs,setup,path)
     # Transmission capacity of the network (in MMBTU per day)
     inputs["ngPipeFlow_Max"] = to_floats(:Pipe_Capacity_MMBTU_day);
 
+    inputs["ngPipelinePath"] = as_vector(:Pipeline_Path);
+
     println(filename * " Successfully Read!")
 
     return inputs
@@ -94,16 +96,17 @@ function load_ng_demand(inputs,setup,path)
 	end
 
     # Create time set steps indicies
-	inputs["ng_hours_per_subperiod"] = div.(ngT,inputs["ng_REP_PERIOD"]) # total number of hours per subperiod
-	hours_per_subperiod = inputs["ng_hours_per_subperiod"] # set value for internal use
+	inputs["ng_days_per_subperiod"] = div.(ngT,inputs["ng_REP_PERIOD"]) # total number of days per subperiod
+	days_per_subperiod = inputs["ng_days_per_subperiod"] # set value for internal use
 
-	inputs["ng_START_SUBPERIODS"] = 1:hours_per_subperiod:ngT 	# set of indexes for all time periods that start a subperiod (e.g. sample day/week)
+	inputs["ng_START_SUBPERIODS"] = 1:days_per_subperiod:ngT 	# set of indexes for all time periods that start a subperiod (e.g. sample day/week)
 	inputs["ng_INTERIOR_SUBPERIODS"] = setdiff(1:ngT, inputs["ng_START_SUBPERIODS"]) # set of indexes for all time periods that do not start a subperiod
 
     start = findall(s -> s == "z1", names(load_in))[1] #gets the starting column number of all the columns, with header "z1"
 
+    scale_factor = setup["ParameterScale"] == 1 ? ModelScalingFactor : 1
     # Max value of non-served natural gas
-    inputs["ng_Voll"] = as_vector(:VOLL);
+    inputs["ng_Voll"] = as_vector(:VOLL)/ scale_factor^2 # convert from $ to million $
     # Demand in MW
     inputs["ng_D"] =Matrix(load_in[1:ngT, start:start+Z-1]);
 
@@ -128,6 +131,15 @@ function load_ng_resources(inputs,setup,path)
 
 	# Add Resource IDs after reading to prevent user errors
 	res_in[!,:R_ID] = 1:length(collect(skipmissing(res_in[!,1])))
+    println(names(res_in))
+    # When ParameterScale= 1 costs are defined in million $
+    if setup["ParameterScale"]==1
+       res_in[!,:InvCost_per_MMBTU] = res_in[!,:InvCost_per_MMBTU]/ ModelScalingFactor^2;
+       res_in[!,:InvCost_per_MMBTUday] = res_in[!,:InvCost_per_MMBTUday]/ ModelScalingFactor^2;
+       res_in[!,:Fixed_OM_Cost_per_MMBTU] = res_in[!,:Fixed_OM_Cost_per_MMBTU]/ ModelScalingFactor^2;
+       res_in[!,:Fixed_OM_Cost_per_MMBTUday] = res_in[!,:Fixed_OM_Cost_per_MMBTUday]/ ModelScalingFactor^2;
+       res_in[!,:Import_Cost_per_MMBTU] = res_in[!,:Import_Cost_per_MMBTU]/ ModelScalingFactor^2;
+    end
 
 	# Store DataFrame of generators/resources input data for use in model
 	inputs["dfNGRes"] = res_in
@@ -137,9 +149,16 @@ function load_ng_resources(inputs,setup,path)
     # Set of LNG storage resources
     inputs["ng_STOR"] = res_in[res_in.Storage.==1,:R_ID]
     # Set of LNG liquefaction resources
-    inputs["ng_LIQ"] = res_in[res_in.Liquefaction.==1,:R_ID]
+    inputs["ng_LIQ"] = res_in[res_in.LiquefCapacity_MMBTU_day.>0,:R_ID]
     # Set of natural gas import resources
     inputs["ng_IMP"] = res_in[res_in.Import.==1,:R_ID]
+    # Set of power generators using natural gas
+    inputs["ng_P_GEN"] = inputs["dfGen"][[occursin("gas",inputs["dfGen"].Resource_Type[n]) for n in 1:inputs["G"]],:R_ID];
+
+    if setup["ModelH2"]==1
+        # Set pf hydrogen generators using natural gas
+        inputs["ng_H2_GEN"] = inputs["dfH2Gen"][[occursin("SMR",inputs["dfH2Gen"].H2_Resource[n]) for n in 1:size(inputs["dfH2Gen"],1)],:R_ID]
+    end
 
     println(filename * " Successfully Read!")
 

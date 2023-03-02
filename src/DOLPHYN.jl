@@ -28,6 +28,7 @@ export generate_model
 export solve_model
 export write_outputs
 export write_HSC_outputs
+export write_NG_outputs
 export cluster_inputs
 export mga
 export h2_inherit_clusters
@@ -327,11 +328,16 @@ include("HSC/write_outputs/choose_h2_output_dir.jl")
 include("NaturalGas/model/natural_gas_model.jl")
 include("NaturalGas/model/ng_investments.jl")
 include("NaturalGas/model/ng_svl.jl")
-include("NaturalGas/model/ng_pipeline.jl")
+include("NaturalGas/model/ng_demand_curtailment.jl")
+include("NaturalGas/model/ng_pipelines.jl")
+include("NaturalGas/model/ng_imports.jl")
 include("NaturalGas/model/ng_to_hydrogen.jl")
 include("NaturalGas/model/ng_to_power.jl")
 
-#Load input data - Natural Gas
+#Load Input Data - Natural Gas
 include("NaturalGas/load_inputs/load_ng_inputs.jl")
+#NG Write Output Data
+include("NaturalGas/write_outputs/write_NG_outputs.jl")
+include("NaturalGas/write_outputs/choose_ng_output_dir.jl")
 
 end
