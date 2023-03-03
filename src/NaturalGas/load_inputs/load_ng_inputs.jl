@@ -14,10 +14,55 @@ function load_ng_inputs(inputs,setup,path)
 
     inputs = load_ng_resources(inputs,setup,path);
 
+    inputs = load_ng_days_to_power_hours(inputs,setup,path);
+
     println("Natural Gas CSV Files Successfully Read In From $path")
 
     return inputs
 
+end
+
+function load_ng_days_to_power_hours(inputs,setup,path)
+
+    if setup["TimeDomainReduction"]==1
+        period_map = "Period_map.csv"
+        data_directory = joinpath(path, setup["TimeDomainReductionFolder"])
+        file_path = joinpath(data_directory, period_map)
+        Period_Map = DataFrame(CSV.File(file_path, header=true), copycols=true)
+    else
+        Period_Map = DataFrame([[1],[1],[1]], ["Period_Index";"Rep_Period";"Rep_Period_Index"])
+    end
+
+    DaysPerPowerPeriod = Int(inputs["hours_per_subperiod"]/24);
+
+    Power_Days=zeros(Int64,DaysPerPowerPeriod*inputs["REP_PERIOD"]);
+    T = 1:inputs["ng_T"];
+    for k in 1:inputs["REP_PERIOD"]
+        c = Period_Map[findfirst(Period_Map[!,:Rep_Period_Index].==k),:Rep_Period];
+        Power_Days[(k-1)*DaysPerPowerPeriod+1:k*DaysPerPowerPeriod] = T[(c-1)*DaysPerPowerPeriod + 1:c*DaysPerPowerPeriod];
+    end
+
+
+
+    corresp_power_day = zeros(Int64,inputs["ng_T"]);
+    for i in 1:length(Period_Map.Period_Index)
+        idx = Period_Map.Period_Index[i];
+        for t in 1:DaysPerPowerPeriod
+            corresp_power_day[ (idx-1)*DaysPerPowerPeriod + t] = Power_Days[(Period_Map.Rep_Period_Index[i]-1)*DaysPerPowerPeriod+t]
+        end
+    end
+
+    if corresp_power_day[end]==0
+        corresp_power_day[end] = corresp_power_day[1];
+    end
+
+    inputs["ng_PowerDays"] = Power_Days;
+    inputs["ng_Corresp_PowerDays"] = corresp_power_day;
+
+    
+    return inputs
+        
+   
 end
 
 function load_ng_network(inputs,setup,path)
@@ -48,14 +93,15 @@ end
 
 function load_ng_demand(inputs,setup,path)
 
-    # Load related inputs
-	data_directory = joinpath(path, setup["TimeDomainReductionFolder"]);
+    # # Load related inputs
+	# data_directory = joinpath(path, setup["TimeDomainReductionFolder"]);
 
-    if setup["TimeDomainReduction"] == 1  &&  (isfile(data_directory*"/Load_data.csv")) && (isfile(data_directory*"/Generators_variability.csv")) && (isfile(data_directory*"/Fuels_data.csv"))
-        my_dir = data_directory
-	else
-        my_dir = path
-	end
+    # if setup["TimeDomainReduction"] == 1  &&  (isfile(data_directory*"/Load_data.csv")) && (isfile(data_directory*"/Generators_variability.csv")) && (isfile(data_directory*"/Fuels_data.csv"))
+    #     my_dir = data_directory
+	# else
+    #     my_dir = path
+	# end
+    my_dir=path;
     filename = "NG_demand.csv"
     file_path = joinpath(my_dir, filename)
     load_in = DataFrame(CSV.File(file_path, header=true), copycols=true)
@@ -71,32 +117,36 @@ function load_ng_demand(inputs,setup,path)
     inputs["ng_SEG"] = ngSEG
 	Z = inputs["Z"]   # Number of zones
 
-	inputs["ng_omega"] = zeros(Float64, ngT) # weights associated with operational sub-period in the model - sum of weight = 8760
-	inputs["ng_REP_PERIOD"] = 1   # Number of periods initialized
-	inputs["ng_H"] = 1   # Number of sub-periods within each period
+    # Modeling full year chronologically at daily resolution 
+	# Total number of periods and subperiods
+	inputs["ng_REP_PERIOD"] = convert(Int16, as_vector(:Rep_Periods)[1])
+	inputs["ng_H"] = 1;
+	inputs["ng_omega"] = ones(Float64, ngT) # weights associated with operational sub-period in the model - sum of weight = 8760
 
-    if setup["OperationWrapping"]==0 # Modeling full year chronologically at hourly resolution
-		# Simple scaling factor for number of subperiods
-		inputs["ng_omega"] .= 1 #changes all rows of inputs["omega"] from 0.0 to 1.0
-	elseif setup["OperationWrapping"]==1
-		# Weights for each period - assumed same weights for each sub-period within a period
-		inputs["ng_Weights"] = as_vector(:Sub_Weights) # Weights each period
 
-		# Total number of periods and subperiods
-		inputs["ng_REP_PERIOD"] = convert(Int16, as_vector(:Rep_Periods)[1])
-		inputs["ng_H"] = convert(Int64, as_vector(:Timesteps_per_Rep_Period)[1])
+    # if setup["OperationWrapping"]==0 # Modeling full year chronologically at hourly resolution
+	# 	# Simple scaling factor for number of subperiods
+	# 	inputs["ng_omega"] .= 1 #changes all rows of inputs["omega"] from 0.0 to 1.0
+	# elseif setup["OperationWrapping"]==1
+	# 	# Weights for each period - assumed same weights for each sub-period within a period
+	# 	inputs["ng_Weights"] = as_vector(:Sub_Weights) # Weights each period
 
-		# Creating sub-period weights from weekly weights
-		for w in 1:inputs["ng_REP_PERIOD"]
-			for h in 1:inputs["ng_H"]
-				t = inputs["ng_H"]*(w-1)+h
-				inputs["ng_omega"][t] = inputs["ng_Weights"][w]/inputs["ng_H"]
-			end
-		end
-	end
+	# 	# Total number of periods and subperiods
+	# 	inputs["ng_REP_PERIOD"] = convert(Int16, as_vector(:Rep_Periods)[1])
+	# 	inputs["ng_H"] = convert(Int64, as_vector(:Timesteps_per_Rep_Period)[1])
+
+	# 	# Creating sub-period weights from weekly weights
+	# 	for w in 1:inputs["ng_REP_PERIOD"]
+	# 		for h in 1:inputs["ng_H"]
+	# 			t = inputs["ng_H"]*(w-1)+h
+	# 			inputs["ng_omega"][t] = inputs["ng_Weights"][w]/inputs["ng_H"]
+	# 		end
+	# 	end
+	# end
 
     # Create time set steps indicies
 	inputs["ng_days_per_subperiod"] = div.(ngT,inputs["ng_REP_PERIOD"]) # total number of days per subperiod
+
 	days_per_subperiod = inputs["ng_days_per_subperiod"] # set value for internal use
 
 	inputs["ng_START_SUBPERIODS"] = 1:days_per_subperiod:ngT 	# set of indexes for all time periods that start a subperiod (e.g. sample day/week)

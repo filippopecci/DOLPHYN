@@ -25,21 +25,21 @@ settings_path = joinpath(pwd(), "Settings")
 genx_settings = joinpath(settings_path, "genx_settings.yml") #Settings YAML file path for GenX
 hsc_settings = joinpath(settings_path, "hsc_settings.yml") #Settings YAML file path for HSC model
 ng_settings = joinpath(settings_path, "ng_settings.yml") #Settings YAML file path for NG model
-mysetup_genx = YAML.load(open(genx_settings)) # mysetup dictionary stores GenX-specific parameters
-mysetup_hsc = YAML.load(open(hsc_settings)) # mysetup dictionary stores H2 supply chain-specific parameters
-mysetup_ng = YAML.load(open(ng_settings)) # mysetup dictionary stores NG-specific parameters
+setup_genx = YAML.load(open(genx_settings)) # setup dictionary stores GenX-specific parameters
+setup_hsc = YAML.load(open(hsc_settings)) # setup dictionary stores H2 supply chain-specific parameters
+setup_ng = YAML.load(open(ng_settings)) # setup dictionary stores NG-specific parameters
 global_settings = joinpath(settings_path, "global_model_settings.yml") # Global settings for inte
-mysetup_global = YAML.load(open(global_settings)) # mysetup dictionary stores global settings
-mysetup = Dict()
-mysetup = merge(mysetup_ng, mysetup_hsc, mysetup_genx, mysetup_global) #Merge dictionary - value of common keys will be overwritten by value in global_model_settings
+setup_global = YAML.load(open(global_settings)) # setup dictionary stores global settings
+setup = Dict()
+setup = merge(setup_ng, setup_hsc, setup_genx, setup_global) #Merge dictionary - value of common keys will be overwritten by value in global_model_settings
 
 # Start logging
 using LoggingExtras
 
-global Log = mysetup["Log"]
+global Log = setup["Log"]
 
 if Log
-    logger = FileLogger(mysetup["LogFile"])
+    logger = FileLogger(setup["LogFile"])
     global_logger(logger)
 end
 
@@ -52,7 +52,7 @@ end
 ### Set relevant directory paths
 src_path = "../../../src/"
 
-inpath = pwd()
+path = pwd()
 
 ### Load DOLPHYN
 println("Loading packages")
@@ -61,16 +61,13 @@ push!(LOAD_PATH, src_path)
 using DOLPHYN
 
 ## Cluster time series inputs if necessary and if specified by the user
-TDRpath = joinpath(inpath, mysetup["TimeDomainReductionFolder"])
-if mysetup["TimeDomainReduction"] == 1
+TDRpath = joinpath(path, setup["TimeDomainReductionFolder"])
+if setup["TimeDomainReduction"] == 1
     if (!isfile(TDRpath*"/Load_data.csv")) || (!isfile(TDRpath*"/Generators_variability.csv")) || (!isfile(TDRpath*"/Fuels_data.csv"))
         print_and_log("Clustering Time Series Data...")
-        cluster_inputs(inpath, settings_path, mysetup);
-        if mysetup["ModelH2"]==1
-            h2_inherit_clusters(inpath,mysetup);
-        end
-        if mysetup["ModelNG"]==1
-            ng_inherit_clusters(inpath,mysetup);
+        cluster_inputs(path, settings_path, setup);
+        if setup["ModelH2"]==1
+            h2_inherit_clusters(path,setup);
         end
     else
         print_and_log("Time Series Data Already Clustered.")
@@ -80,46 +77,46 @@ end
 
 # ### Configure solver
 print_and_log("Configuring Solver")
-OPTIMIZER = configure_solver(mysetup["Solver"], settings_path)
+OPTIMIZER = configure_solver(setup["Solver"], settings_path)
 
 #### Running a case
 
 ### Load power system inputs
 print_and_log("Loading Inputs")
-myinputs = Dict() # myinputs dictionary will store read-in data and computed parameters
-myinputs = load_inputs(mysetup, inpath)
+inputs = Dict() # inputs dictionary will store read-in data and computed parameters
+inputs = load_inputs(setup, path)
 
 ### Load inputs for modeling the hydrogen supply chain
-if mysetup["ModelH2"] == 1
-    myinputs = load_h2_inputs(myinputs, mysetup, inpath)
+if setup["ModelH2"] == 1
+    inputs = load_h2_inputs(inputs, setup, path)
 end
 
 # ### Load inputs for modeling the natural gas transport model
-if mysetup["ModelNG"]==1
-    myinputs = load_ng_inputs(myinputs, mysetup, inpath)
+if setup["ModelNG"]==1
+    inputs = load_ng_inputs(inputs, setup, path)
 end
 
 ### Generate model
 print_and_log("Generating the Optimization Model")
-EP = generate_model(mysetup, myinputs, OPTIMIZER);
+EP = generate_model(setup, inputs, OPTIMIZER);
 
 ### Solve model
 print_and_log("Solving Model")
-EP, solve_time = solve_model(EP, mysetup)
-myinputs["solve_time"] = solve_time # Store the model solve time in myinputs
+EP, solve_time = solve_model(EP, setup)
+inputs["solve_time"] = solve_time # Store the model solve time in inputs
 
 ### Write power system output
 
 print_and_log("Writing Output")
-outpath = "$inpath/Results"
-write_outputs(EP, outpath, mysetup, myinputs);
+outpath = "$path/Results"
+write_outputs(EP, outpath, setup, inputs);
 
 # Write hydrogen supply chain outputs
-if mysetup["ModelH2"] == 1   
-    write_HSC_outputs(EP, outpath, mysetup, myinputs)
+if setup["ModelH2"] == 1   
+    write_HSC_outputs(EP, outpath, setup, inputs)
 end
 
 # Write natural gas outputs
-if mysetup["ModelNG"]==1
-    write_NG_outputs(EP,outpath,mysetup,myinputs)
+if setup["ModelNG"]==1
+    write_NG_outputs(EP,outpath,setup,inputs)
 end

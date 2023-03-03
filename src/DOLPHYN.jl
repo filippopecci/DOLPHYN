@@ -32,7 +32,7 @@ export write_NG_outputs
 export cluster_inputs
 export mga
 export h2_inherit_clusters
-export ng_inherit_clusters
+
 
 using JuMP # used for mathematical programming
 using DataFrames #This package allows put together data into a matrix
@@ -232,7 +232,7 @@ include("HSC/load_inputs/load_h2_g2p_variability.jl")
 
 # Inherit clusters from GenX
 include("h2_inherit_clusters.jl")
-include("ng_inherit_clusters.jl")
+
 
 # Auxiliary logging function
 include("print_and_log.jl")

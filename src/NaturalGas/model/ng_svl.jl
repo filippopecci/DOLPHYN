@@ -36,7 +36,7 @@ function ng_svl!(EP,inputs,setup)
     @constraint(EP,cNgLiquefWithdraw[y in LIQ, t in 1:ngT],vNGWDW[y,t]<=EP[:eNgTotalCapLiquef][y])
 
     # Moving LNG into storage tanks. 
-    # N.B. LNG Import Terminals are charged from out-of-model locations and variables "vNGSTORIN" are considered as free (there is a cost to be paid - see ng_imports.jl)
+    # N.B. LNG Import Terminals are charged from out-of-model locations and variables "vNGSTORIN" are considered as free (there is a cost to be paid - see below)
     @constraint(EP,cNgMoveLNG[y in LIQ, t in 1:ngT], sum(vNGSTORIN[w,t]  for w in df[df[!,:Liquefaction].==y,:R_ID]) == vNGWDW[y,t])
 
     # Storage tank operation with circular indexing

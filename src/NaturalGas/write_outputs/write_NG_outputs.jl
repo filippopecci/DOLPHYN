@@ -45,7 +45,7 @@ function write_ng_to_h2(EP,path,setup,inputs)
 
     vNGH2 = value.(EP[:vNGH2].data);
 
-    df = DataFrame([["Zone";"AnnualSum";["t$i" for i in 1:inputs["ng_T"]]] [Int.(permutedims(inputs["dfH2Gen"][inputs["ng_H2_GEN"],:Zone])); (vNGH2*inputs["ng_omega"])'; vNGH2']],["Resource";inputs["dfH2Gen"][inputs["ng_H2_GEN"],:H2_Resource]]);
+    df = DataFrame([["Zone";"AnnualSum";["t$i" for i in inputs["ng_PowerDays"]]] [Int.(permutedims(inputs["dfH2Gen"][inputs["ng_H2_GEN"],:Zone])); (vNGH2*inputs["ng_omega"])'; vNGH2']],["Resource";inputs["dfH2Gen"][inputs["ng_H2_GEN"],:H2_Resource]]);
 
     CSV.write(path*"/ng_natural_gas_to_hydrogen.csv",df)
 
@@ -58,7 +58,7 @@ function write_ng_to_power(EP,path,setup,inputs)
 
     vNGP = value.(EP[:vNGP].data);
 
-    df = DataFrame([["Zone";"AnnualSum";["t$i" for i in 1:inputs["ng_T"]]] [Int.(permutedims(inputs["dfGen"][inputs["ng_P_GEN"],:Zone])); (vNGP*inputs["ng_omega"])'; vNGP']],["Resource";inputs["dfGen"][inputs["ng_P_GEN"],:Resource]]);
+    df = DataFrame([["Zone";"AnnualSum";["t$i" for i in inputs["ng_PowerDays"]]] [Int.(permutedims(inputs["dfGen"][inputs["ng_P_GEN"],:Zone])); sum(vNGP,dims=2)'; vNGP']],["Resource";inputs["dfGen"][inputs["ng_P_GEN"],:Resource]]);
 
     CSV.write(path*"/ng_natural_gas_to_power.csv",df)
 
