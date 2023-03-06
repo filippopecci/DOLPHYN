@@ -86,16 +86,6 @@ print_and_log("Loading Inputs")
 inputs = Dict() # inputs dictionary will store read-in data and computed parameters
 inputs = load_inputs(setup, path)
 
-### Load inputs for modeling the hydrogen supply chain
-if setup["ModelH2"] == 1
-    inputs = load_h2_inputs(inputs, setup, path)
-end
-
-# ### Load inputs for modeling the natural gas transport model
-if setup["ModelNG"]==1
-    inputs = load_ng_inputs(inputs, setup, path)
-end
-
 ### Generate model
 print_and_log("Generating the Optimization Model")
 EP = generate_model(setup, inputs, OPTIMIZER);

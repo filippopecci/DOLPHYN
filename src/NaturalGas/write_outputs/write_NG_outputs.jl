@@ -45,7 +45,7 @@ function write_ng_to_h2(EP,path,setup,inputs)
 
     vNGH2 = value.(EP[:vNGH2].data);
 
-    df = DataFrame([["Zone";"AnnualSum";["t$i" for i in inputs["ng_PowerDays"]]] [Int.(permutedims(inputs["dfH2Gen"][inputs["ng_H2_GEN"],:Zone])); (vNGH2*inputs["ng_omega"])'; vNGH2']],["Resource";inputs["dfH2Gen"][inputs["ng_H2_GEN"],:H2_Resource]]);
+    df = DataFrame([["Zone";"AnnualSum";["t$i" for i in inputs["ng_PowerDays"]]] [Int.(permutedims(inputs["dfH2Gen"][inputs["ng_H2_GEN"],:Zone])); sum(vNGH2,dims=2)'; vNGH2']],["Resource";inputs["dfH2Gen"][inputs["ng_H2_GEN"],:H2_Resource]]);
 
     CSV.write(path*"/ng_natural_gas_to_hydrogen.csv",df)
 
@@ -90,11 +90,11 @@ end
 
 function write_storage_withdrawal(EP,path,setup,inputs)
 
-    LIQ = inputs["ng_LIQ"]; # Index set of liquefaction resources
+    WDW = inputs["ng_WDW"]; # Index set of liquefaction resources
 
     vNGWDW = value.(EP[:vNGWDW].data);
 
-    df = DataFrame([["Zone";"AnnualSum";["t$i" for i in 1:inputs["ng_T"]]] [Int.(permutedims(inputs["dfNGRes"][LIQ,:Zone])); (vNGWDW*inputs["ng_omega"])'; vNGWDW']],["Resource";inputs["dfNGRes"][LIQ,:Resource]]);
+    df = DataFrame([["Zone";"AnnualSum";["t$i" for i in 1:inputs["ng_T"]]] [Int.(permutedims(inputs["dfNGRes"][WDW,:Zone])); (vNGWDW*inputs["ng_omega"])'; vNGWDW']],["Resource";inputs["dfNGRes"][WDW,:Resource]]);
 
     CSV.write(path*"/ng_storage_wdw.csv",df)
 
@@ -156,42 +156,42 @@ function write_capacity(EP,path,setup,inputs)
     df[!,:NewStorCap].=0.0;
     df[!,:EndStorCap].=0.0;
 
-    df[!,:StartVapCap].=0.0;
-    df[!,:RetVapCap].=0.0;
-    df[!,:NewVapCap].=0.0;
-    df[!,:EndVapCap].=0.0;
+    df[!,:StartStorInjCap].=0.0;
+    df[!,:RetStorInjCap].=0.0;
+    df[!,:NewStorInjCap].=0.0;
+    df[!,:EndStorInjCap].=0.0;
 
-    df[!,:StartLiqCap].=0.0;
-    df[!,:RetLiqCap].=0.0;
-    df[!,:NewLiqCap].=0.0;
-    df[!,:EndLiqCap].=0.0;
+    df[!,:StartStorWdwCap].=0.0;
+    df[!,:RetStorWdwCap].=0.0;
+    df[!,:NewStorWdwCap].=0.0;
+    df[!,:EndStorWdwCap].=0.0;
 
     df[!,:StartImpCap].=0.0;
     df[!,:RetImpCap].=0.0;
     df[!,:NewImpCap].=0.0;
     df[!,:EndImpCap].=0.0;
 
-    SV = inputs["ng_STOR"]; # Index set of storage resources
-    LIQ = inputs["ng_LIQ"]; # Index set of liquefaction resources
+    STOR = inputs["ng_STOR"]; # Index set of storage resources
+    WDW = inputs["ng_WDW"]; # Index set of withdrawing resources
     Pipe_IMP = inputs["ng_Pipe_IMP"]; #Index set of import resources
 
-    for y in SV
+    for y in STOR
         df[y,:StartStorCap]= value(EP[:eNgExistingCapStor][y]);
         df[y,:RetStorCap] = value(EP[:vNGRETCAPSTOR][y]);
         df[y,:NewStorCap] = value(EP[:vNGCAPSTOR][y]);
         df[y,:EndStorCap] = value(EP[:eNgTotalCapStor][y])
 
-        df[y,:StartVapCap]= value(EP[:eNgExistingCapVapor][y]);
-        df[y,:RetVapCap]= value(EP[:vNGRETCAPVAPOR][y]);
-        df[y,:NewVapCap]= value(EP[:vNGCAPVAPOR][y]);
-        df[y,:EndVapCap]= value(EP[:eNgTotalCapVapor][y]);
+        df[y,:StartStorInjCap]= value(EP[:eNgExistingCapStorInj][y]);
+        df[y,:RetStorInjCap]= value(EP[:vNGRETCAPINJ][y]);
+        df[y,:NewStorInjCap]= value(EP[:vNGCAPINJ][y]);
+        df[y,:EndStorInjCap]= value(EP[:eNgTotalCapStorInj][y]);
 
 
-        if y in LIQ
-            df[y,:StartLiqCap]=inputs["dfNGRes"][y,:LiquefCapacity_MMBTU_day];
-            df[y,:RetLiqCap]=0;
-            df[y,:NewLiqCap]=0;
-            df[y,:EndLiqCap]=value(EP[:eNgTotalCapLiquef][y]);
+        if y in WDW
+            df[y,:StartStorWdwCap]=inputs["dfNGRes"][y,:StorWdwCapacity_MMBTU_day];
+            df[y,:RetStorWdwCap]=0;
+            df[y,:NewStorWdwCap]=0;
+            df[y,:EndStorWdwCap]=value(EP[:eNgTotalCapStorWdw][y]);
         end
     end
     

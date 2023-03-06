@@ -28,7 +28,7 @@ function ng_pipelines!(EP,inputs,setup)
     EP[:eNgBalance] += eNgBalancePipeImport + eNgBalanceNetExportFlows;
 
     # Cost of natural gas imports by resource "y" at day "t"
-    @expression(EP,eNgCVar_pipe_import[y in Pipe_IMP,t=1:ngT],inputs["ng_omega"][t]*df[y,:Pipe_Import_Cost_per_MMBTU]*EP[:vNG][y,t])
+    @expression(EP,eNgCVar_pipe_import[y in Pipe_IMP,t=1:ngT],inputs["ng_fuel_costs"][df[y,:Fuel_Cost]][t]*EP[:vNG][y,t])
 
     @expression(EP,eNgTotalCVarPipeImportT[t=1:ngT],sum(eNgCVar_pipe_import[y,t] for y in Pipe_IMP))
 

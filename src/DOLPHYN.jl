@@ -101,7 +101,7 @@ include("$(genxsubmod_path)/load_inputs/load_period_map.jl")
 include("$(genxsubmod_path)/load_inputs/load_minimum_capacity_requirement.jl")
 include("$(genxsubmod_path)/load_inputs/load_load_data.jl")
 include("$(genxsubmod_path)/load_inputs/load_fuels_data.jl")
-include("$(genxsubmod_path)/load_inputs/load_inputs.jl")
+# include("$(genxsubmod_path)/load_inputs/load_inputs.jl")
 
 include("$(genxsubmod_path)/time_domain_reduction/time_domain_reduction.jl")
 
@@ -298,6 +298,7 @@ include("HSC/model/g2p/h2_g2p.jl")
 include("HSC/model/policies/co2_cap_hsc.jl")
 
 # Load model generation and solving scripts
+include("load_inputs.jl")
 include("co2_cap_power_hsc.jl")
 include("generate_model.jl")
 include("solve_model.jl")
