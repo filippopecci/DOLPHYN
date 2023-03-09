@@ -62,7 +62,7 @@ function write_h2_emissions(path::AbstractString, sep::AbstractString, inputs::D
 	end
 
 
-	if ((setup["H2CO2Cap"]==1||setup["H2CO2Cap"]==2||setup["H2CO2Cap"]==3) && setup["SystemCO2Constraint"]==1)
+	if (setup["H2CO2Cap"]==1||setup["H2CO2Cap"]==2||setup["H2CO2Cap"]==3) && setup["SystemCO2Constraint"]==1
 		auxNew_Names=[Symbol("Zone");[Symbol("CO2_Price_$cap") for cap in 1:inputs["H2NCO2Cap"]];Symbol("AnnualSum");[Symbol("t$t") for t in 1:T]]
 		rename!(dfEmissions,auxNew_Names)
 		total = DataFrame(["Total" zeros(1,inputs["H2NCO2Cap"]) sum(dfEmissions[!,:AnnualSum]) fill(0.0, (1,T))], :auto)

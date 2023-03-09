@@ -24,8 +24,6 @@ The CO$_2$ emissions limit can be defined in one of the following ways: a) a mas
 """
 function co2_cap_power_hsc(EP::Model, inputs::Dict, setup::Dict)
 
-	print_and_log("C02 Policies Module for power and hydrogen system combined")
-
 	
 	SEG = inputs["SEG"]  # Number of non-served energy segments for power demand
 	H2_SEG = inputs["H2_SEG"]  # Number of non-served energy segments for H2 demand
@@ -40,6 +38,9 @@ function co2_cap_power_hsc(EP::Model, inputs::Dict, setup::Dict)
 		EP = co2_cap_hsc(EP,inputs,setup)
 
 	elseif setup["SystemCO2Constraint"] ==2 # Joint emissions constraint for power and HSC sector
+		
+		print_and_log("C02 Policies Module for power and hydrogen system combined")
+
 		# In this case, we impose a single emissions constraint across both sectors
 		# Constraint type to be imposed is read from genx_settings.yml 
 		# NOTE: constraint type denoted by setup parameter H2CO2Cap ignored

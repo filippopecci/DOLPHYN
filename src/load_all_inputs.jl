@@ -25,7 +25,7 @@ path - string path to working directory
 
 returns: Dict (dictionary) object containing all data inputs
 """
-function load_inputs(setup::Dict,path::AbstractString)
+function load_all_inputs(setup::Dict,path::AbstractString)
 
 	## Read input files
 	println("Reading Input CSV Files")
@@ -47,11 +47,10 @@ function load_inputs(setup::Dict,path::AbstractString)
 	cost_fuel, CO2_fuel = load_fuels_data!(setup, path, inputs)
 
 	if setup["ModelNG"]==1
+		# Natural Gas fuel cost is accounted for by the cost of all natural gas imports/injection from sources (e.g. import via pipeline or LNG terminal)
 		for f in inputs["fuels"][[occursin("NG",ftype) for ftype in inputs["fuels"]]]
 			cost_fuel[f] .=0;
-			CO2_fuel[f] =0;
 			inputs["fuel_costs"][f] .=0;
-			inputs["fuel_CO2"][f] =0;
 		end
 	end
 	

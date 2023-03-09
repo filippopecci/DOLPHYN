@@ -40,7 +40,7 @@ function load_ng_fuel_data(inputs,setup,path)
     scale_factor = setup["ParameterScale"] == 1 ? ModelScalingFactor : 1
 
     for i = 1:length(fuels)
-        if in(fuels[i],unique(skipmissing(inputs["dfNGRes"].Fuel_Cost)))
+        if in(fuels[i],unique(skipmissing(inputs["dfNGRes"].Fuel)))
             fuel_costs[fuels[i]] =  [sum(costs[(k-1)*24+1:k*24,i] / scale_factor^2)/24 for k in 1:365]; #cost is in million dollars with scaling, dollars wihtout scaling
             # fuel_CO2 is kton/MMBTU with scaling, or ton/MMBTU without scaling.
             fuel_CO2[fuels[i]] = CO2_content[i] / scale_factor;
@@ -196,9 +196,9 @@ function load_ng_resources(inputs,setup,path)
     # When ParameterScale= 1 costs are defined in million $
     if setup["ParameterScale"]==1
        res_in[!,:InvCost_per_MMBTU] = res_in[!,:InvCost_per_MMBTU]/ ModelScalingFactor^2;
-       res_in[!,:InvCost_per_MMBTUday] = res_in[!,:InvCost_per_MMBTUday]/ ModelScalingFactor^2;
+       res_in[!,:InvCost_per_MMBTU_day] = res_in[!,:InvCost_per_MMBTU_day]/ ModelScalingFactor^2;
        res_in[!,:Fixed_OM_Cost_per_MMBTU] = res_in[!,:Fixed_OM_Cost_per_MMBTU]/ ModelScalingFactor^2;
-       res_in[!,:Fixed_OM_Cost_per_MMBTUday] = res_in[!,:Fixed_OM_Cost_per_MMBTUday]/ ModelScalingFactor^2;
+       res_in[!,:Fixed_OM_Cost_per_MMBTU_day] = res_in[!,:Fixed_OM_Cost_per_MMBTU_day]/ ModelScalingFactor^2;
      end
 
 	# Store DataFrame of generators/resources input data for use in model
@@ -206,12 +206,10 @@ function load_ng_resources(inputs,setup,path)
 
 	# Number of resources
 	inputs["ng_R"] = length(collect(skipmissing(res_in[!,:R_ID])))
-    # Set of LNG storage resources
+    # Set of all storage resources
     inputs["ng_STOR"] = res_in[res_in.Storage.==1,:R_ID]
-    # Set of natural gas withdrawing resources
-    inputs["ng_WDW"] = res_in[res_in.StorWdwCapacity_MMBTU_day.>0,:R_ID]
     # Set of natural gas import resources
-    inputs["ng_Pipe_IMP"] = res_in[res_in.Pipe_Import.==1,:R_ID]
+    inputs["ng_SOURCE"] = res_in[res_in.NG_Source.==1,:R_ID]
     inputs["ng_LNG_IMP"] = res_in[res_in.LNG_Import.==1,:R_ID]
     # Set of power generators using natural gas
     inputs["ng_P_GEN"] = inputs["dfGen"][[occursin("gas",inputs["dfGen"].Resource_Type[n]) for n in 1:inputs["G"]],:R_ID];

@@ -9,14 +9,12 @@ function natural_gas_model!(EP,inputs,setup)
 
    ng_investments!(EP,inputs,setup);
    
-   # Initialize Natural Gas Balance Expression
-	# Expression for "baseline" natural gas balance constraint
+   # Initialize Natural Gas Balance Expression for "baseline" natural gas balance constraint
 	@expression(EP, eNgBalance[t=1:ngT, z=1:Z], 0)
 
-   # Natural gas that is injected by resource "y" at day "t"
-   @variable(EP,vNG[y=1:ngR,t=1:ngT]>=0)
+   ng_discharge!(EP,inputs,setup);
 
-   ng_svl!(EP,inputs,setup);
+   ng_storage!(EP,inputs,setup);
    
    ng_pipelines!(EP,inputs,setup);
 

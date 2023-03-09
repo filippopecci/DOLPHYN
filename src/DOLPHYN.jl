@@ -21,9 +21,9 @@ export compare_results
 export print_and_log
 export configure_settings
 export configure_solver
-export load_inputs
-export load_h2_inputs
-export load_ng_inputs
+export load_all_inputs
+# export load_h2_inputs
+# export load_ng_inputs
 export generate_model
 export solve_model
 export write_outputs
@@ -101,7 +101,7 @@ include("$(genxsubmod_path)/load_inputs/load_period_map.jl")
 include("$(genxsubmod_path)/load_inputs/load_minimum_capacity_requirement.jl")
 include("$(genxsubmod_path)/load_inputs/load_load_data.jl")
 include("$(genxsubmod_path)/load_inputs/load_fuels_data.jl")
-# include("$(genxsubmod_path)/load_inputs/load_inputs.jl")
+include("$(genxsubmod_path)/load_inputs/load_inputs.jl")
 
 include("$(genxsubmod_path)/time_domain_reduction/time_domain_reduction.jl")
 
@@ -298,7 +298,7 @@ include("HSC/model/g2p/h2_g2p.jl")
 include("HSC/model/policies/co2_cap_hsc.jl")
 
 # Load model generation and solving scripts
-include("load_inputs.jl")
+include("load_all_inputs.jl")
 include("co2_cap_power_hsc.jl")
 include("generate_model.jl")
 include("solve_model.jl")
@@ -328,7 +328,8 @@ include("HSC/write_outputs/choose_h2_output_dir.jl")
 # Natural Gas Modelling
 include("NaturalGas/model/natural_gas_model.jl")
 include("NaturalGas/model/ng_investments.jl")
-include("NaturalGas/model/ng_svl.jl")
+include("NaturalGas/model/ng_discharge.jl")
+include("NaturalGas/model/ng_storage.jl")
 include("NaturalGas/model/ng_demand_curtailment.jl")
 include("NaturalGas/model/ng_pipelines.jl")
 include("NaturalGas/model/ng_to_hydrogen.jl")

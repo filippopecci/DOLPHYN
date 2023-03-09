@@ -21,11 +21,9 @@ function write_NG_outputs(EP::Model, genx_path::AbstractString, setup::Dict,inpu
 
     df_cap = write_capacity(EP,path,setup,inputs); 
 
-    df_fill = write_storage_filling(EP,path,setup,inputs);
+    df_charge = write_storage_charge(EP,path,setup,inputs);
 
     df_soc = write_storage_level(EP,path,setup,inputs);
-
-    df_wdw = write_storage_withdrawal(EP,path,setup,inputs);
 
     df_ns = write_nonserved(EP,path,setup,inputs);
 
@@ -70,7 +68,7 @@ function write_pipe_flows(EP,path,setup,inputs)
 
     vNGFLOW = value.(EP[:vNGFLOW]);
 
-    df = DataFrame([["AnnualSum";["t$i" for i in 1:inputs["ng_T"]]] [(vNGFLOW*inputs["ng_omega"])'; vNGFLOW']],["Pipe";inputs["ngPipelinePath"]])
+    df = DataFrame([["AnnualSum";["t$i" for i in 1:inputs["ng_T"]]] [sum(vNGFLOW,dims=2)'; vNGFLOW']],["Pipe";inputs["ngPipelinePath"]])
 
     CSV.write(path*"/ng_pipes.csv",df)
 
@@ -81,22 +79,26 @@ function write_nonserved(EP,path,setup,inputs)
 
     eNgBalanceNS = value.(EP[:eNgBalanceNS])';
 
-    df = DataFrame([["AnnualSum";["t$i" for i in 1:inputs["ng_T"]]] [(eNgBalanceNS*inputs["ng_omega"])'; eNgBalanceNS']],["Zone";["z$i" for i in 1:inputs["Z"]]])
+    df = DataFrame([["AnnualSum";["t$i" for i in 1:inputs["ng_T"]]] [sum(eNgBalanceNS,dims=2)'; eNgBalanceNS']],["Zone";["z$i" for i in 1:inputs["Z"]]])
 
     CSV.write(path*"/ng_nonserved.csv",df)
     return df
 end
 
 
-function write_storage_withdrawal(EP,path,setup,inputs)
+function write_storage_charge(EP,path,setup,inputs)
 
-    WDW = inputs["ng_WDW"]; # Index set of liquefaction resources
+    STOR = inputs["ng_STOR"]; # Index set of storage resources
 
-    vNGWDW = value.(EP[:vNGWDW].data);
+    LNG_TERM = inputs["ng_LNG_IMP"]; #Index set of LNG ng_lng_terminals
 
-    df = DataFrame([["Zone";"AnnualSum";["t$i" for i in 1:inputs["ng_T"]]] [Int.(permutedims(inputs["dfNGRes"][WDW,:Zone])); (vNGWDW*inputs["ng_omega"])'; vNGWDW']],["Resource";inputs["dfNGRes"][WDW,:Resource]]);
+    vNGCHARGE = value.(EP[:vNGCHARGE].data);
 
-    CSV.write(path*"/ng_storage_wdw.csv",df)
+    STOR_LNG_TERM = union(STOR,LNG_TERM);
+
+    df = DataFrame([["Zone";"AnnualSum";["t$i" for i in 1:inputs["ng_T"]]] [Int.(permutedims(inputs["dfNGRes"][STOR_LNG_TERM,:Zone])); sum(vNGCHARGE,dims=2)'; vNGCHARGE']],["Resource";inputs["dfNGRes"][STOR_LNG_TERM,:Resource]]);
+
+    CSV.write(path*"/ng_storage_charge.csv",df)
 
     return df
 end
@@ -105,11 +107,15 @@ end
 
 function write_storage_level(EP,path,setup,inputs)
 
-    SV = inputs["ng_STOR"]; # Index set of storage resources
+    STOR = inputs["ng_STOR"]; # Index set of storage resources
 
-    vNGFILL = value.(EP[:vNGFILL].data);
+    LNG_TERM = inputs["ng_LNG_IMP"]; #Index set of LNG ng_lng_terminals
 
-    df = DataFrame([["Zone";"AnnualSum";["t$i" for i in 1:inputs["ng_T"]]] [Int.(permutedims(inputs["dfNGRes"][SV,:Zone])); (vNGFILL*inputs["ng_omega"])'; vNGFILL']],["Resource";inputs["dfNGRes"][SV,:Resource]]);
+    vNGSTOR = value.(EP[:vNGSTOR].data);
+
+    STOR_LNG_TERM = union(STOR,LNG_TERM);
+
+    df = DataFrame([["Zone";"AnnualSum";["t$i" for i in 1:inputs["ng_T"]]] [Int.(permutedims(inputs["dfNGRes"][STOR_LNG_TERM,:Zone])); sum(vNGSTOR,dims=2)'; vNGSTOR']],["Resource";inputs["dfNGRes"][STOR_LNG_TERM,:Resource]]);
 
     CSV.write(path*"/ng_storage_level.csv",df)
 
@@ -117,27 +123,11 @@ function write_storage_level(EP,path,setup,inputs)
 end
 
 
-
-function write_storage_filling(EP,path,setup,inputs)
-
-    SV = inputs["ng_STOR"]; # Index set of storage resources
-
-    vNGSTORIN = value.(EP[:vNGSTORIN].data);
-
-    df = DataFrame([["Zone";"AnnualSum";["t$i" for i in 1:inputs["ng_T"]]] [Int.(permutedims(inputs["dfNGRes"][SV,:Zone])); (vNGSTORIN*inputs["ng_omega"])'; vNGSTORIN']],["Resource";inputs["dfNGRes"][SV,:Resource]]);
-
-    CSV.write(path*"/ng_storage_in.csv",df)
-
-    return df
-end
-
-
-
 function write_injections(EP,path,setup,inputs)
 
     vNG = value.(EP[:vNG]);
 
-    df = DataFrame([["Zone";"AnnualSum";["t$i" for i in 1:inputs["ng_T"]]] [Int.(permutedims(inputs["dfNGRes"][!,:Zone])); (vNG*inputs["ng_omega"])'; vNG']],["Resource";inputs["dfNGRes"].Resource]);
+    df = DataFrame([["Zone";"AnnualSum";["t$i" for i in 1:inputs["ng_T"]]] [Int.(permutedims(inputs["dfNGRes"][!,:Zone])); sum(vNG,dims=2)'; vNG']],["Resource";inputs["dfNGRes"].Resource]);
 
     CSV.write(path*"/ng_injections.csv",df)
     
@@ -149,59 +139,50 @@ function write_capacity(EP,path,setup,inputs)
 
     df = DataFrame([inputs["dfNGRes"][!,:Resource]],["Resource"])
 
+    STOR = inputs["ng_STOR"];#Index set of storage resources
+
+    LNG_TERM = inputs["ng_LNG_IMP"]; #Index set of LNG ng_lng_terminals
+
+    STOR_LNG_TERM = union(STOR,LNG_TERM);
+
     df[!,:Zone] = inputs["dfNGRes"][!,:Zone];
     
+    df[!,:StartCap].=0.0;
+    df[!,:RetCap].=0.0;
+    df[!,:NewCap].=0.0;
+    df[!,:EndCap].=0.0;
+
     df[!,:StartStorCap].=0.0;
     df[!,:RetStorCap].=0.0;
     df[!,:NewStorCap].=0.0;
     df[!,:EndStorCap].=0.0;
 
-    df[!,:StartStorInjCap].=0.0;
-    df[!,:RetStorInjCap].=0.0;
-    df[!,:NewStorInjCap].=0.0;
-    df[!,:EndStorInjCap].=0.0;
+    df[!,:StartChargeCap].=0.0;
+    df[!,:RetChargeCap].=0.0;
+    df[!,:NewChargeCap].=0.0;
+    df[!,:EndChargeCap].=0.0;
 
-    df[!,:StartStorWdwCap].=0.0;
-    df[!,:RetStorWdwCap].=0.0;
-    df[!,:NewStorWdwCap].=0.0;
-    df[!,:EndStorWdwCap].=0.0;
-
-    df[!,:StartImpCap].=0.0;
-    df[!,:RetImpCap].=0.0;
-    df[!,:NewImpCap].=0.0;
-    df[!,:EndImpCap].=0.0;
-
-    STOR = inputs["ng_STOR"]; # Index set of storage resources
-    WDW = inputs["ng_WDW"]; # Index set of withdrawing resources
-    Pipe_IMP = inputs["ng_Pipe_IMP"]; #Index set of import resources
-
-    for y in STOR
-        df[y,:StartStorCap]= value(EP[:eNgExistingCapStor][y]);
-        df[y,:RetStorCap] = value(EP[:vNGRETCAPSTOR][y]);
-        df[y,:NewStorCap] = value(EP[:vNGCAPSTOR][y]);
-        df[y,:EndStorCap] = value(EP[:eNgTotalCapStor][y])
-
-        df[y,:StartStorInjCap]= value(EP[:eNgExistingCapStorInj][y]);
-        df[y,:RetStorInjCap]= value(EP[:vNGRETCAPINJ][y]);
-        df[y,:NewStorInjCap]= value(EP[:vNGCAPINJ][y]);
-        df[y,:EndStorInjCap]= value(EP[:eNgTotalCapStorInj][y]);
+    for y in 1:size(df,1)
 
 
-        if y in WDW
-            df[y,:StartStorWdwCap]=inputs["dfNGRes"][y,:StorWdwCapacity_MMBTU_day];
-            df[y,:RetStorWdwCap]=0;
-            df[y,:NewStorWdwCap]=0;
-            df[y,:EndStorWdwCap]=value(EP[:eNgTotalCapStorWdw][y]);
+        df[y,:StartCap]= value(EP[:eNgExistingCap][y]);
+        df[y,:RetCap] = value(EP[:vNGRETCAP][y]);
+        df[y,:NewCap] = value(EP[:vNGCAP][y]);
+        df[y,:EndCap] = value(EP[:eNgTotalCap][y])
+
+        if y in STOR_LNG_TERM
+            df[y,:StartStorCap]= value(EP[:eNgExistingCapStor][y]);
+            df[y,:RetStorCap]= value(EP[:vNGRETCAPSTOR][y]);
+            df[y,:NewStorCap]= value(EP[:vNGCAPSTOR][y]);
+            df[y,:EndStorCap]= value(EP[:eNgTotalCapStor][y]);
+
+            df[y,:StartChargeCap]= value(EP[:eNgExistingCapCharge][y]);
+            df[y,:RetChargeCap]= value(EP[:vNGRETCAPCHARGE][y]);
+            df[y,:NewChargeCap]= value(EP[:vNGCAPCHARGE][y]);
+            df[y,:EndChargeCap]= value(EP[:eNgTotalCapCharge][y]);
         end
     end
     
-    for y in Pipe_IMP
-        df[y,:StartImpCap]=inputs["dfNGRes"][y,:Max_PipeInflow_MMBTU_day];
-        df[y,:RetImpCap]=0;
-        df[y,:NewImpCap]=0;
-        df[y,:EndImpCap]=value(EP[:eNgTotalCapPipeImport][y]); 
-    end
-
     CSV.write(path*"/ng_capacity.csv",df)
 
     return df

@@ -74,10 +74,10 @@ function write_h2_costs(path::AbstractString, sep::AbstractString, inputs::Dict,
 	end
 
 	# Adding emissions penalty to variable cost depending on type of emissions policy constraint
-	# Emissions penalty is already scaled by adjusting the value of carbon price used in emissions_HSC.jl
-	if((setup["CO2Cap"]==4 && setup["SystemCO2Constraint"]==2)||(setup["H2CO2Cap"]==4 && setup["SystemCO2Constraint"]==1))
-		cH2Var  = cH2Var + value(EP[:eCH2GenTotalEmissionsPenalty])
-	end
+	# Emissions penalty is already scaled by adjusting the value of carbon price used in emissions_HSC.jl THERE IS NO CARBON PRICE IN GENX
+	# if((setup["CO2Cap"]==4 && setup["SystemCO2Constraint"]==2)||(setup["H2CO2Cap"]==4 && setup["SystemCO2Constraint"]==1))
+	# 	cH2Var  = cH2Var + value(EP[:eCH2GenTotalEmissionsPenalty])
+	# end
 
 	if !isempty(inputs["H2_GEN_COMMIT"])
 		if setup["ParameterScale"]==1 # Convert costs in millions to $
@@ -175,11 +175,11 @@ function write_h2_costs(path::AbstractString, sep::AbstractString, inputs::Dict,
 		end
 
 		# Add emisions penalty related costs if the constraints are active
-		# Emissions penalty is already scaled previously depending on value of ParameterScale and hence not scaled here
-		if((setup["CO2Cap"]==4 && setup["SystemCO2Constraint"]==2)||(setup["H2CO2Cap"]==4 && setup["SystemCO2Constraint"]==1))
-			tempCVar  = tempCVar + value.(EP[:eCH2EmissionsPenaltybyZone])[z]
-			tempCTotal = tempCTotal +value.(EP[:eCH2EmissionsPenaltybyZone])[z]
-		end
+		# Emissions penalty is already scaled previously depending on value of ParameterScale and hence not scaled here THERE IS NOT CARBON PRICE IN GENX
+		# if((setup["CO2Cap"]==4 && setup["SystemCO2Constraint"]==2)||(setup["H2CO2Cap"]==4 && setup["SystemCO2Constraint"]==1))
+		# 	tempCVar  = tempCVar + value.(EP[:eCH2EmissionsPenaltybyZone])[z]
+		# 	tempCTotal = tempCTotal +value.(EP[:eCH2EmissionsPenaltybyZone])[z]
+		# end
 
 		if setup["ParameterScale"] == 1 # Convert costs in millions to $
 			tempCNSE = sum(value.(EP[:eH2CNSE])[:,:,z])* (ModelScalingFactor^2)

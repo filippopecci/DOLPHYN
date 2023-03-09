@@ -9,7 +9,7 @@ function ng_demand_curtailment!(EP,inputs,setup)
     @variable(EP,vNGNS[s in 1:ngSEG, t in 1:ngT, z in 1:Z]>=0)
 
     # Cost of non-served natural gas/curtailed demand at day "t" in zone "z"
-	@expression(EP, eNgCNS[s=1:ngSEG,t=1:ngT,z=1:Z], (inputs["ng_omega"][t]*inputs["pC_D_Curtail"][s]*vNGNS[s,t,z]))
+	@expression(EP, eNgCNS[s=1:ngSEG,t=1:ngT,z=1:Z], (inputs["pC_D_Curtail"][s]*vNGNS[s,t,z]))
 
 	# Sum individual demand segment contributions to non-served natural gas costs to get total non-served natural gas costs
 	@expression(EP, eNgTotalCNSTS[t=1:ngT,z=1:Z], sum(eNgCNS[s,t,z] for s in 1:ngSEG))

@@ -84,7 +84,7 @@ OPTIMIZER = configure_solver(setup["Solver"], settings_path)
 ### Load power system inputs
 print_and_log("Loading Inputs")
 inputs = Dict() # inputs dictionary will store read-in data and computed parameters
-inputs = load_inputs(setup, path)
+inputs = load_all_inputs(setup, path)
 
 ### Generate model
 print_and_log("Generating the Optimization Model")

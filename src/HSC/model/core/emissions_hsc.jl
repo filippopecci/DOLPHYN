@@ -62,77 +62,79 @@ function emissions_hsc(EP::Model, inputs::Dict, setup::Dict)
         eH2EmissionsByZone[z = 1:Z, t = 1:T],
         sum(eH2EmissionsByPlant[y, t] for y in dfH2Gen[(dfH2Gen[!, :Zone].==z), :R_ID])
     )
+    
+    # Carbon price is not implemented by current GenX module, so we do not model it for H2 either.
+    
+    # # If CO2 price is implemented in HSC balance or Power Balance and SystemCO2 constraint is active (independent or joint), then need to add cost penalty due to CO2 prices
+    # if (setup["H2CO2Cap"] == 4 && setup["SystemCO2Constraint"] == 1)
+    #     # Use CO2 price for HSC supply chain
+    #     # Emissions penalty by zone - needed to report zonal cost breakdown
+    #     @expression(
+    #         EP,
+    #         eCH2EmissionsPenaltybyZone[z = 1:Z],
+    #         sum(
+    #             inputs["omega"][t] * sum(
+    #                 eH2EmissionsByZone[z, t] * inputs["dfH2CO2Price"][z, cap] for
+    #                 cap in findall(x -> x == 1, inputs["dfH2CO2CapZones"][z, :])
+    #             ) for t = 1:T
+    #         )
+    #     )
+    #     # Sum over each policy type, each zone and each time step
+    #     @expression(
+    #         EP,
+    #         eCH2EmissionsPenaltybyPolicy[cap = 1:inputs["H2NCO2Cap"]],
+    #         sum(
+    #             inputs["omega"][t] * sum(
+    #                 eH2EmissionsByZone[z, t] * inputs["dfH2CO2Price"][z, cap] for
+    #                 z in findall(x -> x == 1, inputs["dfH2CO2CapZones"][:, cap])
+    #             ) for t = 1:T
+    #         )
+    #     )
+    #     # Total emissions penalty across all policy constraints
+    #     @expression(
+    #         EP,
+    #         eCH2GenTotalEmissionsPenalty,
+    #         sum(eCH2EmissionsPenaltybyPolicy[cap] for cap = 1:inputs["H2NCO2Cap"])
+    #     )
 
-    # If CO2 price is implemented in HSC balance or Power Balance and SystemCO2 constraint is active (independent or joint), then need to add cost penalty due to CO2 prices
-    if (setup["H2CO2Cap"] == 4 && setup["SystemCO2Constraint"] == 1)
-        # Use CO2 price for HSC supply chain
-        # Emissions penalty by zone - needed to report zonal cost breakdown
-        @expression(
-            EP,
-            eCH2EmissionsPenaltybyZone[z = 1:Z],
-            sum(
-                inputs["omega"][t] * sum(
-                    eH2EmissionsByZone[z, t] * inputs["dfH2CO2Price"][z, cap] for
-                    cap in findall(x -> x == 1, inputs["dfH2CO2CapZones"][z, :])
-                ) for t = 1:T
-            )
-        )
-        # Sum over each policy type, each zone and each time step
-        @expression(
-            EP,
-            eCH2EmissionsPenaltybyPolicy[cap = 1:inputs["H2NCO2Cap"]],
-            sum(
-                inputs["omega"][t] * sum(
-                    eH2EmissionsByZone[z, t] * inputs["dfH2CO2Price"][z, cap] for
-                    z in findall(x -> x == 1, inputs["dfH2CO2CapZones"][:, cap])
-                ) for t = 1:T
-            )
-        )
-        # Total emissions penalty across all policy constraints
-        @expression(
-            EP,
-            eCH2GenTotalEmissionsPenalty,
-            sum(eCH2EmissionsPenaltybyPolicy[cap] for cap = 1:inputs["H2NCO2Cap"])
-        )
-
-        # Add total emissions penalty associated with direct emissions from H2 generation technologies
-        EP[:eObj] += eCH2GenTotalEmissionsPenalty
+    #     # Add total emissions penalty associated with direct emissions from H2 generation technologies
+    #     EP[:eObj] += eCH2GenTotalEmissionsPenalty
 
 
-    elseif (setup["CO2Cap"] == 4 && setup["SystemCO2Constraint"] == 2)
-        # Use CO2 price for power system as the global CO2 price
-        # Emissions penalty by zone - needed to report zonal cost breakdown
-        @expression(
-            EP,
-            eCH2EmissionsPenaltybyZone[z = 1:Z],
-            sum(
-                inputs["omega"][t] * sum(
-                    eH2EmissionsByZone[z, t] * inputs["dfCO2Price"][z, cap] for
-                    cap in findall(x -> x == 1, inputs["dfCO2CapZones"][z, :])
-                ) for t = 1:T
-            )
-        )
-        # Sum over each policy type, each zone and each time step
-        @expression(
-            EP,
-            eCH2EmissionsPenaltybyPolicy[cap = 1:inputs["NCO2Cap"]],
-            sum(
-                inputs["omega"][t] * sum(
-                    eH2EmissionsByZone[z, t] * inputs["dfCO2Price"][z, cap] for
-                    z in findall(x -> x == 1, inputs["dfCO2CapZones"][:, cap])
-                ) for t = 1:T
-            )
-        )
-        @expression(
-            EP,
-            eCH2GenTotalEmissionsPenalty,
-            sum(eCH2EmissionsPenaltybyPolicy[cap] for cap = 1:inputs["NCO2Cap"])
-        )
+    # elseif (setup["CO2Cap"] == 4 && setup["SystemCO2Constraint"] == 2)
+    #     # Use CO2 price for power system as the global CO2 price
+    #     # Emissions penalty by zone - needed to report zonal cost breakdown
+    #     @expression(
+    #         EP,
+    #         eCH2EmissionsPenaltybyZone[z = 1:Z],
+    #         sum(
+    #             inputs["omega"][t] * sum(
+    #                 eH2EmissionsByZone[z, t] * inputs["dfCO2Price"][z, cap] for
+    #                 cap in findall(x -> x == 1, inputs["dfCO2CapZones"][z, :])
+    #             ) for t = 1:T
+    #         )
+    #     )
+    #     # Sum over each policy type, each zone and each time step
+    #     @expression(
+    #         EP,
+    #         eCH2EmissionsPenaltybyPolicy[cap = 1:inputs["NCO2Cap"]],
+    #         sum(
+    #             inputs["omega"][t] * sum(
+    #                 eH2EmissionsByZone[z, t] * inputs["dfCO2Price"][z, cap] for
+    #                 z in findall(x -> x == 1, inputs["dfCO2CapZones"][:, cap])
+    #             ) for t = 1:T
+    #         )
+    #     )
+    #     @expression(
+    #         EP,
+    #         eCH2GenTotalEmissionsPenalty,
+    #         sum(eCH2EmissionsPenaltybyPolicy[cap] for cap = 1:inputs["NCO2Cap"])
+    #     )
 
-        # Add total emissions penalty associated with direct emissions from H2 generation technologies
-        EP[:eObj] += eCH2GenTotalEmissionsPenalty
+    #     # Add total emissions penalty associated with direct emissions from H2 generation technologies
+    #     EP[:eObj] += eCH2GenTotalEmissionsPenalty
 
-    end
+    # end
 
     return EP
 end
