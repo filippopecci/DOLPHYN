@@ -1,6 +1,6 @@
 function ng_storage!(EP,inputs,setup)
 
-    print_and_log("Natural Gas SVL Module")
+    print_and_log("Natural Gas Storage Module")
 
     df = inputs["dfNGRes"];
 

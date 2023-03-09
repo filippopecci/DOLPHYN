@@ -1,5 +1,7 @@
 function ng_discharge!(EP,inputs,setup)
 
+    print_and_log("Natural Gas Discharge Module")
+
     ngT = inputs["ng_T"];     # Number of time steps (days)
 	Z = inputs["Z"];     # Number of zones - assumed to be same for power, hydrogen, and natural gas system
     SOURCE = inputs["ng_SOURCE"];#Index set of natural gas sources
