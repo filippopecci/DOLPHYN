@@ -1,5 +1,5 @@
-State,Network_zones,Pipes,z1,z2,z3,Pipe_Capacity_MMBTU_day,Pipeline_Path
-MA,z1,1,-1.0,1.0,0.0,1.36e6,CT_to_MA
-CT,z2,2,-1.0,0.0,1.0,1.178e6,ME_to_MA
-ME,z3,3,1.0,-1.0,0.0,439000.0,MA_to_CT
-,,4,1.0,0.0,-1.0,1.359e6,MA_to_ME
+State,Network_zones,Pipes,z1,z2,z3,Pipe_Capacity_MMBTU_day,Pipeline_Path,Pipe_Loss_Percentage
+MA,z1,1,-1,1,0,1.36E+06,CT_to_MA,0.02
+CT,z2,2,-1,0,1,1.18E+06,ME_to_MA,0.02
+ME,z3,3,1,-1,0,439000,MA_to_CT,0.02
+,,4,1,0,-1,1.36E+06,MA_to_ME,0.02
