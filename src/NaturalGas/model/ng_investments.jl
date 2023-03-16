@@ -87,15 +87,13 @@ function ng_investments!(EP,inputs,setup)
     # Constraints on retired capacity   
     @constraint(EP,cNgNoRet[y in NO_RETIRE], vNGRETCAP[y] ==0)
 
-    # Constraints on retired storage capacity  
-    @constraint(EP,cNgNoRetStor[y in NO_RETIRE], vNGRETCAPSTOR[y] ==0)
-
-    # Constraints on retired charge capacity  
-    @constraint(EP,cNgNoRetCharge[y in NO_RETIRE], vNGRETCAPCHARGE[y] ==0)
-
-
     # Constraints on new capacity
     @constraint(EP,cNgMaxNew[y in NO_NEW_BUILD], vNGCAP[y]==0)
+
+    if !isempty(intersect(NO_RETIRE,STOR_LNG_TERM))
+        # Constraints on retired storage capacity  
+        @constraint(EP,cNgNoRetStor[y in intersect(NO_RETIRE,STOR_LNG_TERM)], vNGRETCAPSTOR[y] ==0)
+    end
 
     if !isempty(intersect(NO_NEW_BUILD,STOR_LNG_TERM))
         # Constraints on new storage capacity
@@ -104,5 +102,8 @@ function ng_investments!(EP,inputs,setup)
 
     # Constraints on new charge capacity
     @constraint(EP,cNgMaxChargeNew[y in STOR_LNG_TERM], vNGCAPCHARGE[y]==0)
+
+    # Constraints on retired charge capacity  
+    @constraint(EP,cNgNoRetCharge[y in STOR_LNG_TERM], vNGRETCAPCHARGE[y] ==0)
 
 end

@@ -7,7 +7,7 @@ function ng_to_power!(EP,inputs,setup)
     Corresp_PowerDays = inputs["ng_Corresp_PowerDays"];
     PowerDays = inputs["ng_PowerDays"];
 
-    ngT = inputs["ng_T"];
+    T = inputs["ng_T"];
 
     Z = inputs["Z"];
 
@@ -17,7 +17,7 @@ function ng_to_power!(EP,inputs,setup)
 
     # Natural Gas that is used by power generators
     #@expression(EP, eNgBalancePower[t=1:ngT, z=1:Z], sum(vNGP[y,t] for y in intersect(Pgen, dfGen[dfGen[!,:Zone].==z,:R_ID])))
-    @expression(EP, eNgBalancePower[t=1:ngT, z=1:Z], sum(vNGP[y,Corresp_PowerDays[t]] for y in intersect(Pgen, dfGen[dfGen[!,:Zone].==z,:R_ID])))
+    @expression(EP, eNgBalancePower[t=1:T, z=1:Z], sum(vNGP[y,Corresp_PowerDays[t]] for y in intersect(Pgen, dfGen[dfGen[!,:Zone].==z,:R_ID])))
         
     # Natural Gas Balance Expression
     EP[:eNgBalance] += - eNgBalancePower;

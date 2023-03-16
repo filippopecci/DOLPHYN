@@ -4,7 +4,7 @@ function ng_to_hydrogen!(EP,inputs,setup)
 
     H2gen = inputs["ng_H2_GEN"];
 
-    ngT = inputs["ng_T"];
+    T = inputs["ng_T"];
 
     Z = inputs["Z"];
 
@@ -16,7 +16,7 @@ function ng_to_hydrogen!(EP,inputs,setup)
     @variable(EP, vNGH2[y in H2gen, t in PowerDays] >=0)
 
     # Natural Gas that is used by H2 generators
-    @expression(EP, eNgBalanceH2[t=1:ngT, z=1:Z], sum(vNGH2[y,Corresp_PowerDays[t]] for y in intersect(H2gen, dfH2Gen[dfH2Gen[!,:Zone].==z,:R_ID])))
+    @expression(EP, eNgBalanceH2[t=1:T, z=1:Z], sum(vNGH2[y,Corresp_PowerDays[t]] for y in intersect(H2gen, dfH2Gen[dfH2Gen[!,:Zone].==z,:R_ID])))
         
     # Natural Gas Balance Expression
     EP[:eNgBalance] += - eNgBalanceH2;

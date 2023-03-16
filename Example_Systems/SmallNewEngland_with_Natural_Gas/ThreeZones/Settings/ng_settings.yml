@@ -1,5 +1,4 @@
 ModelNG: 1 #Flag to turn or off natural gas network modelling capabilities - 0 - no NG, 1- NG modeled
 NGPipeInteger: 0 # Whether to model pipeline capacity as discrete or integer - 0 - continuous capacity, 1- discrete capacity
 NGNetworkExpansion: 0 # Transmission network expansional; 0 = not active; 1 = active systemwide
-NGCO2Cap: 0 # CO2 emissions cap for NG only; 0 = not active (no CO2 emission limit); 1 = mass-based emission limit constraint; 2 = load + rate-based emission limit constraint; 3 = generation + rate-based emission limit constraint; 4 = emissions penalized via a carbon price
-NGTimestepsPerRepPeriod: 7 # these are days!
+NGCO2Cap: 1 # CO2 emissions cap for NG only; 0 = not active (no CO2 emission limit); 1 = mass-based emission limit constraint; 2 = load + rate-based emission limit constraint; 3 = generation + rate-based emission limit constraint; 4 = emissions penalized via a carbon price

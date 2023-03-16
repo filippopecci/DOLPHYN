@@ -95,18 +95,18 @@ print_and_log("Solving Model")
 EP, solve_time = solve_model(EP, setup)
 inputs["solve_time"] = solve_time # Store the model solve time in inputs
 
-### Write power system output
+# ### Write power system output
 
-print_and_log("Writing Output")
-outpath = "$path/Results"
-write_outputs(EP, outpath, setup, inputs);
+# print_and_log("Writing Output")
+# outpath = "$path/Results"
+# write_outputs(EP, outpath, setup, inputs);
 
-# Write hydrogen supply chain outputs
-if setup["ModelH2"] == 1   
-    write_HSC_outputs(EP, outpath, setup, inputs)
-end
+# # Write hydrogen supply chain outputs
+# if setup["ModelH2"] == 1   
+#     write_HSC_outputs(EP, outpath, setup, inputs)
+# end
 
-# Write natural gas outputs
-if setup["ModelNG"]==1
-    write_NG_outputs(EP,outpath,setup,inputs)
-end
+# # Write natural gas outputs
+# if setup["ModelNG"]==1
+#     write_NG_outputs(EP,outpath,setup,inputs)
+# end

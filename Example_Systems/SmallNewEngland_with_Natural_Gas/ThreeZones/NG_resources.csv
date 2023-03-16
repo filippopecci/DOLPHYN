@@ -1,11 +1,11 @@
-Resource,Zone,NG_Source,LNG_Import,Storage,Existing_Cap_MMBTU,Existing_Cap_MMBTU_day,Existing_Charge_Cap_MMBTU_day,Eff_Down,Eff_Up,Self_Disch,Min_Stor_Level,InvCost_per_MMBTU,InvCost_per_MMBTU_day,Fixed_OM_Cost_per_MMBTU,Fixed_OM_Cost_per_MMBTU_day,Fuel,County,State,Latitude,Longitude
-CT_Hartford_Storage_Liquefaction_1,2,0,0,1,1.20E+06,122000,6000,0.989,1,0,0,58.7555468,146.5310634,3.6,327.3,,Hartford,CT,41.66,72.63
-MA_Middlesex_Storage_Liquefaction_1,1,0,0,1,1.15E+07,1.11E+06,17000,0.989,1,0,0,58.7555468,146.5310634,3.6,327.3,,Middlesex,MA,42.22,71.52
-CT_New Haven_Storage_Liquefaction_1,2,0,0,1,1.20E+06,120000,6000,0.989,1,0,0,58.7555468,146.5310634,3.6,327.3,,New Haven,CT,41.55,73.07
-CT_New Haven_Storage_Liquefaction_2,2,0,0,1,1.20E+06,105000,6000,0.989,1,0,0,58.7555468,146.5310634,3.6,327.3,,New Haven,CT,41.23,73.08
-MA_Hampden_Storage_Liquefaction_1,1,0,0,1,1.03E+06,69000,8000,0.989,1,0,0,58.7555468,146.5310634,3.6,327.3,,Hampden,MA,42.16,72.48
-MA_Everett_LNG_Terminal,1,0,1,0,3.40E+06,715000,0,0.989,1,0,0,58.7555468,146.5310634,3.6,327.3,MA_NG,Middlesex,MA,42.391,71.0587
-MA_NorthestGateway_LNG_Terminal,1,0,1,0,3.00E+06,800000,0,0.989,1,0,0,58.7555468,146.5310634,3.6,327.3,MA_NG,Essex,MA,42.6049,70.3599
-MA_Pipe_Import,1,1,0,0,0,1.79E+06,0,0,0,0,0,0,0,0,0,MA_NG,,MA,42.11705682,71.46503407
-CT_Pipe_Import,2,1,0,0,0,2.92E+06,0,0,0,0,0,0,0,0,0,CT_NG,,CT,41.61543381,72.65811878
-ME_Pipe_Import,3,1,0,0,0,833000,0,0,0,0,0,0,0,0,0,ME_NG,,ME,44.70014638,69.53595606
+Resource,Zone,NG_Source,LNG_Import,Storage,Existing_Cap_MMBTU,Existing_Cap_MMBTU_day,Existing_Cap_Charge_MMBTU_day,Max_Cap_MMBTU,Max_Cap_MMBTU_day,Max_Cap_Charge_MMBTU_day,Min_Cap_MMBTU,Min_Cap_MMBTU_day,Min_Cap_Charge_MMBTU_day,InvCost_per_MMBTU,InvCost_per_MMBTU_day,InvCost_Charge_per_MMBTU_day,Fixed_OM_Cost_per_MMBTU,Fixed_OM_Cost_per_MMBTU_day,Fixed_OM_Cost_Charge_per_MMBTU_day,Eff_Down,Eff_Up,Self_Disch,Min_Duration,Max_Duration,Min_Stor_Level,Import_Price,State,Latitude,Longitude
+CT_Hartford_Storage_Liquefaction_1,2,0,0,2,1.20E+06,122000,6000,-1,-1,-1,0,0,0,58.7555468,146.5310634,0,3.6,327.3,0,0.989,1,0,0,0,0,none,CT,41.66,72.63
+MA_Middlesex_Storage_Liquefaction_1,1,0,0,2,1.15E+07,1.11E+06,17000,-1,-1,-1,0,0,0,58.7555468,146.5310634,0,3.6,327.3,0,0.989,1,0,0,0,0,none,MA,42.22,71.52
+CT_New Haven_Storage_Liquefaction_1,2,0,0,2,1.20E+06,120000,6000,-1,-1,-1,0,0,0,58.7555468,146.5310634,0,3.6,327.3,0,0.989,1,0,0,0,0,none,CT,41.55,73.07
+CT_New Haven_Storage_Liquefaction_2,2,0,0,2,1.20E+06,105000,6000,-1,-1,-1,0,0,0,58.7555468,146.5310634,0,3.6,327.3,0,0.989,1,0,0,0,0,none,CT,41.23,73.08
+MA_Hampden_Storage_Liquefaction_1,1,0,0,2,1.03E+06,69000,8000,-1,-1,-1,0,0,0,58.7555468,146.5310634,0,3.6,327.3,0,0.989,1,0,0,0,0,none,MA,42.16,72.48
+MA_Everett_LNG_Terminal,1,0,1,0,3.40E+06,715000,0,-1,-1,-1,0,0,0,58.7555468,146.5310634,0,3.6,327.3,0,0.989,1,0,0,0,0,MA_NG,MA,42.391,71.0587
+MA_NorthestGateway_LNG_Terminal,1,0,1,0,3.00E+06,800000,0,-1,-1,-1,0,0,0,58.7555468,146.5310634,0,3.6,327.3,0,0.989,1,0,0,0,0,MA_NG,MA,42.6049,70.3599
+MA_Pipe_Import,1,1,0,0,0,1.79E+06,0,-1,-1,-1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,MA_NG,MA,42.11705682,71.46503407
+CT_Pipe_Import,2,1,0,0,0,2.92E+06,0,-1,-1,-1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,CT_NG,CT,41.61543381,72.65811878
+ME_Pipe_Import,3,1,0,0,0,833000,0,-1,-1,-1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,ME_NG,ME,44.70014638,69.53595606

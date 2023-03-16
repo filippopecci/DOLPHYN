@@ -188,10 +188,10 @@ function generate_model(setup::Dict,inputs::Dict,OPTIMIZER::MOI.OptimizerWithAtt
 
 	################  Policies #####################3
 	# CO2 emissions limits for the power sector only
-	if setup["ModelH2"] ==0
+	if setup["ModelH2"] ==0 && setup["ModelNG"]==0 && setup["CO2Cap"]>=1
 		co2_cap!(EP, inputs, setup)
-	elseif setup["ModelH2"]==1
-		EP = co2_cap_power_hsc(EP, inputs, setup)
+	elseif setup["ModelH2"]==1 || setup["ModelNG"]==1
+		EP = co2_cap_all_sectors(EP, inputs, setup)
 	end
 
 	# Endogenous Retirements

@@ -299,7 +299,7 @@ include("HSC/model/policies/co2_cap_hsc.jl")
 
 # Load model generation and solving scripts
 include("load_all_inputs.jl")
-include("co2_cap_power_hsc.jl")
+include("co2_cap_all_sectors.jl")
 include("generate_model.jl")
 include("solve_model.jl")
 
@@ -327,13 +327,22 @@ include("HSC/write_outputs/choose_h2_output_dir.jl")
 
 # Natural Gas Modelling
 include("NaturalGas/model/natural_gas_model.jl")
-include("NaturalGas/model/ng_investments.jl")
-include("NaturalGas/model/ng_discharge.jl")
-include("NaturalGas/model/ng_storage.jl")
-include("NaturalGas/model/ng_demand_curtailment.jl")
-include("NaturalGas/model/ng_pipelines.jl")
-include("NaturalGas/model/ng_to_hydrogen.jl")
-include("NaturalGas/model/ng_to_power.jl")
+include("NaturalGas/model/core/discharge/ng_discharge.jl")
+include("NaturalGas/model/core/discharge/ng_investment_discharge.jl")
+include("NaturalGas/model/core/ng_demand_curtailment.jl")
+include("NaturalGas/model/core/ng_pipelines.jl")
+include("NaturalGas/model/core/ng_emissions.jl")
+include("NaturalGas/model/resources/imports/ng_imports.jl")
+include("NaturalGas/model/resources/imports/ng_lng_terminals.jl")
+include("NaturalGas/model/resources/storage/ng_investment_storage.jl")
+include("NaturalGas/model/resources/storage/ng_investment_charge.jl")
+include("NaturalGas/model/resources/storage/ng_storage.jl")
+include("NaturalGas/model/resources/storage/ng_storage_all.jl")
+include("NaturalGas/model/resources/storage/ng_storage_asymmetric.jl")
+include("NaturalGas/model/resources/storage/ng_storage_symmetric.jl")
+include("NaturalGas/model/policies/co2_cap_ng.jl")
+include("NaturalGas/model/sector_coupling/ng_to_power.jl")
+include("NaturalGas/model/sector_coupling/ng_to_hydrogen.jl")
 
 #Load Input Data - Natural Gas
 include("NaturalGas/load_inputs/load_ng_inputs.jl")
