@@ -155,6 +155,8 @@ function load_ng_network(inputs::Dict,setup::Dict,path::AbstractString)
     # Transmission capacity of the network (in MMBTU per day)
     inputs["ngPipeFlow_Max"] = to_floats(:Pipe_Capacity_MMBTU_day);
 
+    inputs["ngPercent_Loss"] = to_floats(:Pipe_Loss_Percentage);
+    inputs["ng_LOSS_PIPES"] = findall(inputs["ngPercent_Loss"].!=0) # Pipes for which loss coefficients apply (are non-zero)
     inputs["ngPipelinePath"] = as_vector(:Pipeline_Path);
 
     println(filename * " Successfully Read!")

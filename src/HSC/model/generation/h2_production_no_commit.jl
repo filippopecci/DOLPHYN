@@ -108,14 +108,14 @@ function h2_production_no_commit(EP::Model, inputs::Dict,setup::Dict)
 
 
 	###Constraints###
-	# Power and natural gas consumption associated with H2 generation in each time step
+	# Power consumption associated with H2 generation in each time step
 	@constraints(EP, begin
 		#Power Balance
 		[k in H2_GEN_NO_COMMIT, t = 1:T], EP[:vP2G][k,t] == EP[:vH2Gen][k,t] * dfH2Gen[!,:etaP2G_MWh_p_tonne][k]
 	end)
-	
+
 	@constraints(EP, begin
-	# Maximum power generated per technology "k" at hour "t"
+	# Maximum hydrigen generated per technology "k" at hour "t"
 	[k in H2_GEN_NO_COMMIT, t=1:T], EP[:vH2Gen][k,t] <= EP[:eH2GenTotalCap][k]* inputs["pH2_Max"][k,t]
 	end)
 
